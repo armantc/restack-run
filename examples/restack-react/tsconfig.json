@@ -1,0 +1,38 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "lib": [
+            "DOM",
+            "DOM.Iterable",
+            "ESNext"
+        ],
+        "jsx": "react-jsx",
+        "isolatedModules": true,
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ],
+            "@assets/*": [
+                "./src/assets/*"
+            ],
+            "@routes/*": [
+                "./src/routes/*"
+            ]
+        }
+    },
+    "exclude": [
+        "node_modules",
+        "**/node_modules/*",
+        "dist/*"
+    ],
+    "include": [
+        "./svg.d.ts",
+        "src",
+        "./"
+    ],
+    "references": [
+        {
+            "path": "./tsconfig.node.json"
+        }
+    ]
+}

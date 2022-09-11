@@ -49,6 +49,8 @@ generateServerEntry(routesDir);
 
 let nodeProcess: ChildProcessWithoutNullStreams;
 
+vite();
+
 function runServer() {
 	if (nodeProcess) {
 		try {

@@ -5,10 +5,12 @@ import viteCompression from "vite-plugin-compression";
 import svgrPlugin from "vite-plugin-svgr";
 import legacy from "@vitejs/plugin-legacy";
 import viteReStackPlugin from "../vite-plugin";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 const defaultConfig = defineConfig({
 	cacheDir: "cache/.vite",
 	plugins: [
+		tsconfigPaths(),
 		viteReStackPlugin(),
 		legacy({
 			targets: ["defaults", "not IE 11"],

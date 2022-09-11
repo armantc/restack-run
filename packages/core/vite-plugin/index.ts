@@ -13,7 +13,7 @@ export default function viteReStackPlugin(): PluginOption {
 		enforce: "pre",
 		transform: async function (code, id) {
 			if (id.endsWith(".jsx") || id.endsWith(".tsx")) {
-				if (code.indexOf("@restack/server") >= 0) {
+				if (code.indexOf("@restack-run/server") >= 0) {
 
 					const out = putout(code, {
 						fix:true,

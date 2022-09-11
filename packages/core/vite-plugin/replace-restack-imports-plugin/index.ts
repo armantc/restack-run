@@ -1,7 +1,7 @@
 export const report = () => "";
 
 export const replace = () => ({
-	'"@restack/server"': '"@restack/client"',
+	'"@restack-run/server"': '"@restack-run/client"',
 });
 
 export default {report,replace};

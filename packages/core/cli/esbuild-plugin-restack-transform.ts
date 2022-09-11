@@ -188,7 +188,7 @@ function handleReStackCall(push, path, listStore, store) {
 
 	const calleeName = callee.name || callee.object.name;
 
-	const restackCalls = store("@restack/server");
+	const restackCalls = store("@restack-run/server");
 
 	if (restackCalls) {
 		for (const sCaller of restackCalls) {

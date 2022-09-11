@@ -12,7 +12,7 @@ export default function generateServerEntry(routesDir: string) {
 		dot: true,
 	});
 
-	let content = 'import restackServer from "@restack/server";\r\n';
+	let content = 'import restackServer from "@restack-run/server";\r\n';
 
 	const imports: string[] = [];
 	const registers: string[] = [];
