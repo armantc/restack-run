@@ -13,6 +13,6 @@
 		"format": "esm"
 	},
 	"scripts": {
-		"build": "npx tsup"
+		"build": "pnpm tsup"
 	}
 }

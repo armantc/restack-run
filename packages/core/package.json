@@ -20,7 +20,7 @@
 		"format": "esm"
 	},
 	"scripts": {
-		"build": "npx tsup-node"
+		"build": "pnpm tsup-node"
 	},
 	"dependencies": {
 		"@babel/parser": "^7.18.13",

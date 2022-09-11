@@ -13,7 +13,7 @@
 		"format": "esm"
 	},
 	"scripts": {
-		"build": "npx tsup-node"
+		"build": "pnpm tsup-node"
 	},
 	"dependencies": {
 		"fastify": "^4.5.2"
