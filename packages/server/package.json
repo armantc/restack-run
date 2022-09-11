@@ -1,0 +1,21 @@
+{
+	"name": "@restack-run/server",
+	"main": "dist/index.js",
+	"typings": "dist/index.d.ts",
+	"type": "module",
+	"tsup": {
+		"entry": [
+			"./index.ts"
+		],
+		"clean": true,
+		"splitting": true,
+		"dts": true,
+		"format": "esm"
+	},
+	"scripts": {
+		"build": "npx tsup-node"
+	},
+	"dependencies": {
+		"fastify": "^4.5.2"
+	}
+}

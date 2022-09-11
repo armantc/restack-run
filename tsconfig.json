@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"importHelpers": true,
+		"target": "ESNext",
+		"useDefineForClassFields": true,
+		"allowJs": true,
+		"checkJs": false,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"strict": true,
+		"forceConsistentCasingInFileNames": true,
+		"module": "ESNext",
+		"moduleResolution": "Node",
+		"resolveJsonModule": true,
+		"noEmit": true,
+		"noImplicitAny": false,
+		"noImplicitThis": false
+	},
+	"exclude": ["node_modules", "**/node_modules/*", "dist"]
+}

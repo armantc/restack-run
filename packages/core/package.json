@@ -1,0 +1,56 @@
+{
+	"name": "@restack-run/core",
+	"main": "dist/index.js",
+	"typings": "dist/index.d.ts",
+	"type": "module",
+	"bin": {
+		"restack": "./dist/cli/index.js"
+	},
+	"files": [
+		"./dist/cli/index.js"
+	],
+	"tsup": {
+		"entry": [
+			"./index.ts",
+			"./cli/index.ts"
+		],
+		"clean": true,
+		"splitting": true,
+		"dts": true,
+		"format": "esm"
+	},
+	"scripts": {
+		"build": "npx tsup-node"
+	},
+	"dependencies": {
+		"@babel/parser": "^7.18.13",
+		"@babel/plugin-transform-typescript": "^7.18.12",
+		"@babel/traverse": "^7.18.13",
+		"@vitejs/plugin-legacy": "^2.1.0",
+		"@vitejs/plugin-react": "^2.1.0",
+		"babel-plugin-tsconfig-paths": "^1.0.3",
+		"chalk": "^5.0.1",
+		"chokidar": "^3.5.3",
+		"commander": "^3.0.0",
+		"comment-json": "^4.2.3",
+		"consola": "^2.15.3",
+		"convert-source-map": "^1.8.0",
+		"esbuild": "^0.15.6",
+		"fast-glob": "^3.2.11",
+		"fs-extra": "^10.1.0",
+		"lodash": "^4.17.21",
+		"log-symbols": "^5.1.0",
+		"lowdb": "^3.0.0",
+		"nanoid": "^4.0.0",
+		"putout": "^27.7.0",
+		"rimraf": "^3.0.2",
+		"vite": "^3.1.0",
+		"vite-plugin-compression": "^0.5.1",
+		"vite-plugin-pwa": "^0.12.7",
+		"vite-plugin-svgr": "^2.2.1"
+	},
+	"devDependencies": {
+		"@types/fs-extra": "^9.0.13",
+		"@types/lodash": "^4.14.184"
+	}
+}
