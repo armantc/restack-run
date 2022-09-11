@@ -12,9 +12,6 @@ const defaultConfig = defineConfig({
 	plugins: [
 		tsconfigPaths(),
 		viteReStackPlugin(),
-		legacy({
-			targets: ["defaults", "not IE 11"],
-		}),
 		react(),
 		svgrPlugin({
 			svgrOptions: {

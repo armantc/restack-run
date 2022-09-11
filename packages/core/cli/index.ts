@@ -18,156 +18,157 @@ import logSymbols from "log-symbols";
 import vite from "./vite";
 import config from "./config";
 
-config();
+export const validRouteExts = ["js", "ts", "jsx", "tsx"];
 
 commander
-	.description("Transform ReStack to runnable code")
+	.description("Transform restack codes to runnable code")
 	.option("build", "Generate and bundle runnable code for production", false)
-	.option("preview" , "run builded code", false)
+	.option("preview", "run builded code", false)
+	.option("--config <path>", "set config file to use", undefined);
 
 commander.parse(process.argv);
 
 const options = commander.opts();
 
-console.log(chalk.blue("START"), " Bundle ReStack server code");
+void config(options.config).then((config) => {
+	config.build = options.build;
+	config.preview = options.preview;
 
-const isDev = !options.build && !options.preview;
+	console.log(chalk.blue("start transform"), " restack server code");
 
-const routesDir = "src/routes";
+	rimraf.sync(`${config.restack?.outDir}/**/*`);
 
-const outDir = "dist";
+	generateServerEntry(config.restack?.routesDir);
 
-const serverOutDir = path.join(outDir,"/server").replaceAll("\\", "/");
+	let nodeProcess: ChildProcessWithoutNullStreams;
 
-const watch = options.watch;
+	const outBundleFile = path.join(
+		config.restack.outDir,
+		config.restack.outFile
+	);
 
-export const validRouteExts = ["js", "ts", "jsx", "tsx"];
-
-rimraf.sync(`${serverOutDir}/**/*`);
-
-generateServerEntry(routesDir);
-
-let nodeProcess: ChildProcessWithoutNullStreams;
-
-vite();
-
-function runServer() {
-	if (nodeProcess) {
-		try {
-			nodeProcess.kill();
-		} catch (e) {
-			console.log(e);
+	function runServer() {
+		if (nodeProcess) {
+			try {
+				nodeProcess.kill();
+			} catch (e) {
+				console.log(e);
+			}
 		}
+
+		nodeProcess = spawn("node", [outBundleFile]);
+
+		// nodeProcess.stdout.on("data", (data) => {
+		// 	console.log(`child stdout:\n${data}`);
+		// });
+
+		nodeProcess.stdout.pipe(process.stdout);
+
+		console.log(chalk.blue("START"), " server");
 	}
 
-	nodeProcess = spawn("node", [`${outDir}/index.js`]);
-
-	// nodeProcess.stdout.on("data", (data) => {
-	// 	console.log(`child stdout:\n${data}`);
-	// });
-
-	nodeProcess.stdout.pipe(process.stdout);
-
-	console.log(chalk.blue("START"), " server");
-}
-
-//void vite(!isDev ? "production" : "dev" );
-
-void esbuild
-	.build({
-		entryPoints: ["./cache/.restack/server.entry.js"], //must compare with destination and remove not existing entries
-		treeShaking: !isDev, //remove dead code
-		platform: "node",
-		bundle: true,
-		format: "esm",
-		external: [
-			"./node_modules/*",
-			"../node_modules/*",
-			"../../node_modules/*",
-			"../../../node_modules/*",
-		],
-		minify: !isDev,
-		outfile: `${outDir}/index.js`,
-		plugins: [PluginRestackTransform],
-		sourcemap: true,
-		incremental: isDev && watch,
-	})
-	.then((result) => {
-		if (result.errors.length > 0) {
-			console.log(
-				chalk.red("DONE"),
-				" Bundle ReStack server code with errors"
-			);
-			console.log(result.errors);
-		} else if (result.warnings.length > 0) {
-			console.log(
-				chalk.yellow("DONE"),
-				" Bundle ReStack server code with warnings"
-			);
-			console.log(result.warnings);
-		} else {
-			console.log(chalk.green("DONE"), " Bundled ReStack server code");
-
-			if (isDev) {
-				runServer();
-			}
-
-			if (isDev && watch) {
-				const watchPaths: string[] = [];
-
-				for (const ext of validRouteExts) {
-					watchPaths.push(
-						path
-							.join(routesDir, `/**/*.${ext}`)
-							.replaceAll("\\", "/")
-					);
-				}
-
-				const debounceRebuild = lodash.debounce(() => {
-					generateServerEntry(routesDir);
-					void result.rebuild().then((result) => {
-						if (result.errors.length > 0) {
-							console.log(
-								chalk.red("DONE"),
-								" Rebuild bundle ReStack server code with errors"
-							);
-							console.log(result.errors);
-						} else if (result.warnings.length > 0) {
-							console.log(
-								chalk.yellow("DONE"),
-								" Rebuild bundle ReStack server code with warnings"
-							);
-							console.log(result.warnings);
-						} else {
-							console.log(
-								chalk.green("DONE"),
-								" Rebuild bundle ReStack server code"
-							);
-
-							runServer();
-						}
-					});
-				}, 100);
-
-				const onChange = (path: string) => {
+	if (!config.preview) {
+		void esbuild
+			.build({
+				entryPoints: ["./cache/.restack/server.entry.js"], //must compare with destination and remove not existing entries
+				treeShaking: !config.build, //remove dead code
+				platform: "node",
+				bundle: true,
+				format: "esm",
+				external: [
+					"./node_modules/*",
+					"../node_modules/*",
+					"../../node_modules/*",
+					"../../../node_modules/*",
+				],
+				minify: !config.build,
+				outfile: outBundleFile,
+				plugins: [PluginRestackTransform],
+				sourcemap: true,
+				incremental: !config.build,
+			})
+			.then((result) => {
+				if (result.errors.length > 0) {
 					console.log(
-						chalk.green("REBUILD"),
-						" file change detected : ",
-						chalk.dim(path)
+						chalk.red("DONE"),
+						" Bundle ReStack server code with errors"
+					);
+					console.log(result.errors);
+				} else if (result.warnings.length > 0) {
+					console.log(
+						chalk.yellow("DONE"),
+						" Bundle ReStack server code with warnings"
+					);
+					console.log(result.warnings);
+				} else {
+					console.log(
+						chalk.green("DONE"),
+						" Bundled ReStack server code"
 					);
 
-					debounceRebuild();
-				};
+					if (!config.build) {
+						runServer();
 
-				chokidar
-					.watch(watchPaths, {
-						ignoreInitial: true,
-					})
-					.on("add", onChange)
-					.on("change", onChange)
-					.on("unlink", onChange);
+						const watchPaths: string[] = [];
 
-				console.log(chalk.blue("START"), " watching on files");
-			}
-		}
-	});
+						for (const ext of validRouteExts) {
+							watchPaths.push(
+								path
+									.join(
+										config.restack.routesDir,
+										`/**/*.${ext}`
+									)
+									.replaceAll("\\", "/")
+							);
+						}
+
+						const debounceRebuild = lodash.debounce(() => {
+							generateServerEntry(config.restack.routesDir);
+							void result.rebuild?.().then((result) => {
+								if (result.errors.length > 0) {
+									console.log(
+										chalk.red("DONE"),
+										" Rebuild bundle ReStack server code with errors"
+									);
+									console.log(result.errors);
+								} else if (result.warnings.length > 0) {
+									console.log(
+										chalk.yellow("DONE"),
+										" Rebuild bundle ReStack server code with warnings"
+									);
+									console.log(result.warnings);
+								} else {
+									console.log(
+										chalk.green("DONE"),
+										" Rebuild bundle ReStack server code"
+									);
+
+									runServer();
+								}
+							});
+						}, 100);
+
+						const onChange = (path: string) => {
+							console.log(
+								chalk.green("REBUILD"),
+								" file change detected : ",
+								chalk.dim(path)
+							);
+
+							debounceRebuild();
+						};
+
+						chokidar
+							.watch(watchPaths, {
+								ignoreInitial: true,
+							})
+							.on("add", onChange)
+							.on("change", onChange)
+							.on("unlink", onChange);
+
+						console.log(chalk.blue("START"), " watching on files");
+					}
+				}
+			});
+	}
+});

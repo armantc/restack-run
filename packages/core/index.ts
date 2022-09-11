@@ -1,3 +1,3 @@
-import viteReStackPlugin from "./vite-plugin";
+import { defineConfig } from "./cli/config";
 
-export {viteReStackPlugin};
+export {defineConfig};
