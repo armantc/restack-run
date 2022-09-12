@@ -24,7 +24,12 @@ commander
 	.description("Transform restack codes to runnable code")
 	.option("build", "Generate and bundle runnable code for production", false)
 	.option("preview", "run builded code", false)
-	.option("--config <path>", "set config file to use", undefined);
+	.option("--config <path>", "set config file to use", undefined)
+	.option(
+		"--independent",
+		"if set true bundle with all external modules and no need npm install anymore, suitable for serverless like CloudFlare Workers, and pushing server codes",
+		false
+	);
 
 commander.parse(process.argv);
 
@@ -33,7 +38,12 @@ const options = commander.opts();
 void config(options.config).then(async (config) => {
 	config.build = options.build;
 	config.preview = options.preview;
-	
+	config.independent = options.independent;
+
+	if(!config.build && !config.preview) //dev mode
+		config.restack.outDir = path.join(config.restack.cacheDir,config.restack.outDir)
+		.replaceAll("\\", "/");
+
 	await restack(config);
 
 	void vite(config);

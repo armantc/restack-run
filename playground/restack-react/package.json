@@ -4,7 +4,8 @@
 	"scripts": {
 		"dev": "restack",
 		"build": "restack build",
-		"preview": "restack preview"
+		"preview": "restack preview",
+		"buildIndependent" : "restack build --independent"
 	},
 	"dependencies": {
 		"@restack-run/server": "workspace:*",

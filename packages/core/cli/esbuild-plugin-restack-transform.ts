@@ -1,3 +1,4 @@
+import { UserConfig } from "./types";
 import esbuild from "esbuild";
 import putout, { types, operator } from "putout";
 import convert from "convert-source-map";
@@ -247,10 +248,19 @@ function transform({ id, source }) {
 	return out.code;
 }
 
-const PluginRestackTransform: esbuild.Plugin = {
+const PluginRestackTransform = (config: UserConfig): esbuild.Plugin => ({
 	name: "RestackTransform",
 	setup(build) {
 		build.onLoad({ filter: /.*\.(tsx|jsx|ts|js)$/ }, async (args) => {
+
+			const routesAbsPath = path.join(process.cwd(),config.restack.routesDir);
+
+			//just transform routes
+			//todo maybe need exclude importers too
+			if (!args.path.startsWith(routesAbsPath)) {
+				return {}
+			}
+
 			const source = await fs.readFile(args.path, {
 				encoding: "utf-8",
 			});
@@ -269,6 +279,6 @@ const PluginRestackTransform: esbuild.Plugin = {
 			} as esbuild.OnLoadResult;
 		});
 	},
-};
+});
 
 export default PluginRestackTransform;

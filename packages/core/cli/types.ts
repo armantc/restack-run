@@ -28,6 +28,7 @@ export type UserConfig = {
     restack : RestackConfig,
     build? : boolean,
     preview? : boolean,
+    independent? : boolean
 }
 
 export type ExportUserConfig = {
