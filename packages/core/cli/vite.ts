@@ -1,3 +1,4 @@
+import { UserConfig } from './types';
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { createServer ,build ,  defineConfig , PluginOption, InlineConfig , loadConfigFromFile } from "vite";
 import react from "@vitejs/plugin-react";
@@ -65,9 +66,9 @@ const defaultConfig = defineConfig({
 	},
 });
 
-export default async function vite(mode = "dev" ){
+export default async function vite( config : UserConfig ){
 
-	if(mode === "dev")
+	if(!(config.build || config.preview)) //development mode 
 	{
 		const server = await createServer(defaultConfig as InlineConfig);
 
@@ -75,6 +76,7 @@ export default async function vite(mode = "dev" ){
 		server.printUrls();
 	}else{
 		//production build
-		await build(defaultConfig as InlineConfig);
+		if(config.build)
+			await build(defaultConfig as InlineConfig);
 	}
 }

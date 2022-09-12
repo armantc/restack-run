@@ -6,8 +6,6 @@ import convert from "convert-source-map";
 
 export default function viteReStackPlugin(): PluginOption {
 
-	let gen: Generator;
-
 	return {
 		name: "viteRestack",
 		enforce: "pre",

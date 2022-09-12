@@ -2,13 +2,13 @@
 	"name": "restack-react",
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
-		"build": "pnpm tsc & vite build",
-		"preview": "vite preview",
-		"test": "restack"
+		"dev": "restack",
+		"build": "restack build",
+		"preview": "restack preview"
 	},
 	"dependencies": {
 		"@restack-run/server": "workspace:*",
+		"@restack-run/client": "workspace:*",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
 	},
