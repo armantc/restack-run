@@ -19,8 +19,10 @@ type RestackConfig = {
 	outFile: string;
     /**
      * prepend to each api path in restack server
+     * 
+     * @default /api
      */
-    apiPath : string;
+    apiPrefix : string;
     /**
      * define server entry file path
      */

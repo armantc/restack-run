@@ -82,7 +82,7 @@ const defaultConfig : ExportUserConfig = {
 		},
 	},
 	restack: {
-        apiPath : "/api",
+        apiPrefix : "/api",
 		cacheDir: "cache/.restack",
 		routesDir: "src/routes",
 		outDir: "dist/server",
