@@ -86,7 +86,8 @@ const defaultConfig : ExportUserConfig = {
 		cacheDir: "cache/.restack",
 		routesDir: "src/routes",
 		outDir: "dist/server",
-		outFile: "index.js"
+		outFile: "index.js",
+		port : 8080
 	},
 };
 

@@ -180,7 +180,7 @@ function generateServerEntry(config: UserConfig) {
 
 	content += [...imports, ...registers].join("\r\n");
 
-	content += `\r\nrestackServer.start(${8080});`; //todo must apply port from config
+	content += `\r\nrestackServer.start(${config.restack.port});`;
 
 	if (config.restack.serverEntryPath) {
 		const oSEntryContent = fs.readFileSync(config.restack.serverEntryPath, {

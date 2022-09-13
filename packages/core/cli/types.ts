@@ -27,6 +27,10 @@ type RestackConfig = {
      * define server entry file path
      */
     serverEntryPath? : string;
+    /**
+     * port server listening on
+     */
+    port? : number;
 };
 
 export type UserConfig = {

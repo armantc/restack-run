@@ -37,4 +37,10 @@ export function start(port=8080){
 	console.log("ReStack server start listening on port " + port);
 }
 
+type Route = {
+	
+}
+
+function route()
+
 export default {get,post,register,start}
