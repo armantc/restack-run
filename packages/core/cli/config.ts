@@ -12,7 +12,10 @@ import fs from "fs-extra";
 const tsConfigPath = "restack.config.ts";
 const jsConfigPath = "restack.config.js";
 
-const defaultConfig = {
+const jsServerEntryPath = "src/server.entry.js";
+const tsServerEntryPath = "src/server.entry.ts";
+
+const defaultConfig : ExportUserConfig = {
 	vite: {
 		cacheDir: "cache/.vite",
 		plugins: [
@@ -83,7 +86,7 @@ const defaultConfig = {
 		cacheDir: "cache/.restack",
 		routesDir: "src/routes",
 		outDir: "dist/server",
-		outFile: "index.js",
+		outFile: "index.js"
 	},
 };
 
@@ -91,20 +94,38 @@ export default async function config(configFile) : Promise<UserConfig> {
 	if (!configFile) {
 		configFile =
 			(fs.existsSync(tsConfigPath) && tsConfigPath) ||
-			(fs.existsSync(jsConfigPath) && jsConfigPath);
+			(fs.existsSync(jsConfigPath) && jsConfigPath) || undefined;
 	}
 
-	let config : any = await loadConfigFromFile(
+	let config : any = {};
+
+	if(configFile){
+		config = await loadConfigFromFile(
 		{
 			command: "build",
 			mode: "development",
 		},
 		configFile
 	);
+	}
 
-	if (config) config = mergeConfig(defaultConfig, config.config);
+	const mergedConfig : UserConfig = mergeConfig(defaultConfig, config.config) as UserConfig;
 
-	return config as Promise<UserConfig>;
+	if(!mergedConfig.restack.serverEntryPath)
+	{
+		mergedConfig.restack.serverEntryPath =
+			(fs.existsSync(tsServerEntryPath) && tsServerEntryPath) ||
+			(fs.existsSync(jsServerEntryPath) && jsServerEntryPath) ||
+			undefined;
+	}else
+	{
+		if(fs.existsSync(mergedConfig.restack.serverEntryPath))
+			throw new Error(
+				`server entry file not found on path : ${mergedConfig.restack.serverEntryPath}`
+			);
+	}
+
+	return mergedConfig;
 }
 
 export function defineConfig(config: ExportUserConfig) : ExportUserConfig {

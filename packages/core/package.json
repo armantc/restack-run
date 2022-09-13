@@ -15,7 +15,7 @@
 			"./cli/index.ts"
 		],
 		"clean": true,
-		"splitting": true,
+		"splitting": false,
 		"dts": true,
 		"format": "esm"
 	},

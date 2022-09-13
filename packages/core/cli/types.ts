@@ -21,6 +21,10 @@ type RestackConfig = {
      * prepend to each api path in restack server
      */
     apiPath : string;
+    /**
+     * define server entry file path
+     */
+    serverEntryPath? : string;
 };
 
 export type UserConfig = {

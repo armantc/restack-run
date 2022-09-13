@@ -174,6 +174,12 @@ function generateServerEntry(config : UserConfig) {
 
 	content += `\r\nrestackServer.start(${8080});`; //todo must apply port from config
 
+	if(config.restack.serverEntryPath)
+	{
+		const oSEntryContent = fs.readFileSync(config.restack.serverEntryPath,{encoding : "utf-8"});
+		content = oSEntryContent + content;
+	}
+
 	const entryOutPath = path.join(config.restack.cacheDir,"server.entry.js");
 
 	fs.outputFileSync(entryOutPath, content);
