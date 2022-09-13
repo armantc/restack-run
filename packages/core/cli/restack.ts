@@ -142,11 +142,16 @@ function runServer(config: UserConfig, bundlePath: string) {
 	console.log(chalk.blue("START"), " server");
 }
 
-function generateServerEntry(config : UserConfig) {
-	const entries = fg.sync(`${path.join(config.restack.routesDir,"/**/*").replaceAll("\\", "/")}.{${validRouteExts.join(",")}}`, {
-		onlyFiles: true,
-		dot: true,
-	});
+function generateServerEntry(config: UserConfig) {
+	const entries = fg.sync(
+		`${path
+			.join(config.restack.routesDir, "/**/*")
+			.replaceAll("\\", "/")}.{${validRouteExts.join(",")}}`,
+		{
+			onlyFiles: true,
+			dot: true,
+		}
+	);
 
 	let content = 'import restackServer from "@restack-run/server";\r\n';
 
@@ -156,7 +161,10 @@ function generateServerEntry(config : UserConfig) {
 	for (const entry of entries) {
 		let importPath = path.join("../../", entry).replaceAll("\\", "/");
 
-		const importName = generateDefaultImportName(entry, config.restack.routesDir);
+		const importName = generateDefaultImportName(
+			entry,
+			config.restack.routesDir
+		);
 
 		importPath = importPath.substring(0, importPath.lastIndexOf(".")); //remove extension
 
@@ -174,13 +182,14 @@ function generateServerEntry(config : UserConfig) {
 
 	content += `\r\nrestackServer.start(${8080});`; //todo must apply port from config
 
-	if(config.restack.serverEntryPath)
-	{
-		const oSEntryContent = fs.readFileSync(config.restack.serverEntryPath,{encoding : "utf-8"});
+	if (config.restack.serverEntryPath) {
+		const oSEntryContent = fs.readFileSync(config.restack.serverEntryPath, {
+			encoding: "utf-8",
+		});
 		content = oSEntryContent + content;
 	}
 
-	const entryOutPath = path.join(config.restack.cacheDir,"server.entry.js");
+	const entryOutPath = path.join(config.restack.cacheDir, "server.entry.js");
 
 	fs.outputFileSync(entryOutPath, content);
 
@@ -196,8 +205,22 @@ function generateDefaultImportName(entry: string, routesDir: string) {
 }
 
 function generateBasePath(entry: string, routesDir: string) {
-	let defName = entry.replace(routesDir, "");
-	defName = defName.substring(0, defName.lastIndexOf("/")); //remove file name
+	const uri = entry.replace(routesDir, "");
 
-	return defName === "" ? "/" : defName;
+	const parts = uri.split("/");
+
+	let fileName = parts[parts.length - 1];
+	fileName = fileName.substring(0, fileName.lastIndexOf("."));
+	parts[parts.length - 1] = fileName;
+	
+	if (fileName.toLowerCase() === "index") parts.pop();
+
+	parts.forEach((value, index, array) => {
+		if (value.startsWith("$")) value = value.replace("$", ":");
+		array[index] = value;
+	});
+
+	const route = parts.join("/");
+
+	return route === "" ? "/" : route;
 }
