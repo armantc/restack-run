@@ -41,6 +41,4 @@ type Route = {
 	
 }
 
-function route()
-
 export default {get,post,register,start}

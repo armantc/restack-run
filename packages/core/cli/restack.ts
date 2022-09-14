@@ -44,7 +44,7 @@ export default async function restack(config: UserConfig) {
 			treeShaking: true, //remove dead code
 			platform: "node",
 			bundle: true,
-			format: "esm",
+			format: config.independent ? "cjs" : "esm",
 			minify: config.build,
 			outfile: bundlePath,
 			plugins: [PluginRestackTransform(config)],
