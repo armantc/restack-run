@@ -16,6 +16,8 @@
 		"build": "pnpm tsup-node"
 	},
 	"dependencies": {
-		"fastify": "^4.5.2"
+		"fastify": "^4.5.2",
+		"pino": "^8.5.0",
+		"pino-pretty": "^9.1.0"
 	}
 }

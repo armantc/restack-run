@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 //import reactLogo from './assets/react.svg';
-import {get} from "@restack-run/server";
 import Dashboard from '@routes/Dashboard';
 
 //export {Dashboard};
@@ -13,10 +12,6 @@ function test(param:any){
 // 	schema : {name : "ali", family : "test"},
 // 	callback : ()=> {console.log("hereee")}
 // });
-
-export const definition = get(()=>{
-	console.log("some callback puted here");
-});
 
 const x =10;
 const y = 12;
