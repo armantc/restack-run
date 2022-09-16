@@ -180,7 +180,14 @@ function generateServerEntry(config: UserConfig) {
 
 	content += [...imports, ...registers].join("\r\n");
 
-	content += `\r\nrestackServer.start(${config.restack.port});`;
+	content += `
+	restackServer.start(
+		${config.restack.port},
+		"${config.restack.apiPrefix}",
+		"${path.relative(config.restack.outDir, config.vite.build?.outDir || "./")
+		.replaceAll("\\", "/")}"
+		);
+	`;
 
 	if (config.restack.serverEntryPath) {
 		const oSEntryContent = fs.readFileSync(config.restack.serverEntryPath, {

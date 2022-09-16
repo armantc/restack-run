@@ -5,7 +5,7 @@ import svgrPlugin from "vite-plugin-svgr";
 //import legacy from "@vitejs/plugin-legacy";
 import viteReStackPlugin from "../vite-plugin";
 import tsconfigPaths from "vite-tsconfig-paths";
-import type { UserConfig,ExportUserConfig } from "./types";
+import type { UserConfig,UserConfigExport } from "./types";
 
 import fs from "fs-extra";
 
@@ -15,7 +15,7 @@ const jsConfigPath = "restack.config.js";
 const jsServerEntryPath = "src/server.entry.js";
 const tsServerEntryPath = "src/server.entry.ts";
 
-const defaultConfig : ExportUserConfig = {
+const defaultConfig: UserConfigExport = {
 	vite: {
 		cacheDir: "cache/.vite",
 		plugins: [
@@ -45,7 +45,7 @@ const defaultConfig : ExportUserConfig = {
 		esbuild: {
 			banner: "/* ReStack APP",
 			footer: "/* https://restack.run */",
-			legalComments: "none",
+			legalComments: "none"
 		},
 		build: {
 			outDir: "dist/client",
@@ -53,7 +53,6 @@ const defaultConfig : ExportUserConfig = {
 			rollupOptions: {
 				output: {
 					sourcemapExcludeSources: true, //exclude source content from map in production, just line number and column
-					dir: "dist/client",
 					assetFileNames: (file) => {
 						const path = "static/$/[name]-[hash].[ext]";
 
@@ -82,12 +81,12 @@ const defaultConfig : ExportUserConfig = {
 		},
 	},
 	restack: {
-        apiPrefix : "/api",
+		apiPrefix: "/api",
 		cacheDir: "cache/.restack",
 		routesDir: "src/routes",
 		outDir: "dist/server",
 		outFile: "index.js",
-		port : 8080
+		port: 8080,
 	},
 };
 
@@ -129,6 +128,6 @@ export default async function config(configFile) : Promise<UserConfig> {
 	return mergedConfig;
 }
 
-export function defineConfig(config: ExportUserConfig) : ExportUserConfig {
+export function defineConfig(config: UserConfigExport) : UserConfigExport {
     return config;
 }

@@ -1,4 +1,4 @@
-import type { UserConfigExport } from "vite";
+import type { UserConfig as ViteUserConfig } from "vite";
 
 type RestackConfig = {
     /**
@@ -34,14 +34,14 @@ type RestackConfig = {
 };
 
 export type UserConfig = {
-    vite : UserConfigExport,
-    restack : RestackConfig,
-    build? : boolean,
-    preview? : boolean,
-    independent? : boolean
-}
+	vite: ViteUserConfig;
+	restack: RestackConfig;
+	build?: boolean;
+	preview?: boolean;
+	independent?: boolean;
+};
 
-export type ExportUserConfig = {
-	vite?: UserConfigExport;
+export type UserConfigExport = {
+	vite?: ViteUserConfig;
 	restack?: RestackConfig;
 };

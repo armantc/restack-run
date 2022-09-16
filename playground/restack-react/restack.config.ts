@@ -57,39 +57,6 @@ export default defineConfig({
 			banner: "/* ReStack APP by Md. Arman Kabir */",
 			footer: "/* follow me on LinkedIn! https://www.linkedin.com/in/md-arman-kabir-63746728/ */",
 			legalComments: "none",
-		},
-		build: {
-			outDir: "dist/client",
-			sourcemap: true, //in production, we disable sourcemap for security if you want to see source enable it
-			rollupOptions: {
-				output: {
-					sourcemapExcludeSources: true, //exclude source content from map in production, just line number and column
-					dir: "dist/client",
-					assetFileNames: (file) => {
-						const path = "static/$/[name]-[hash].[ext]";
-
-						if (file?.name?.endsWith(".css"))
-							return path.replace("$", "css");
-						else if (
-							file?.name?.endsWith(".woff") ||
-							file?.name?.endsWith(".woff2") ||
-							file?.name?.endsWith(".ttf") ||
-							file?.name?.endsWith(".eot")
-						)
-							return path.replace("$", "fonts");
-
-						return path.replace("$", "media");
-					},
-				},
-			},
-		},
-		server: {
-			proxy: {
-				"/api": {
-					target: "http://localhost:8080",
-					changeOrigin: true,
-				},
-			},
-		},
+		}
 	}
 });
