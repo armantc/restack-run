@@ -68,6 +68,10 @@ export default async function restack(config: UserConfig) {
 				"../../node_modules/*",
 				"../../../node_modules/*",
 			];
+		else
+			//fix issue if used with package json type module
+			esbuildOpts.outfile = 
+				esbuildOpts.outfile?.substring(0,esbuildOpts.outfile.lastIndexOf(".")) + ".cjs";
 
 		const result = await esbuild.build(esbuildOpts);
 

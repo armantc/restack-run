@@ -72,24 +72,16 @@ class Server {
 	}
 
 	async start(port: 8080, apiPrefix, publicPath) {
+
 		const fastifyInstance = fastify({
-			logger: {
-				transport: {
-					target: "pino-pretty",
-					options: {
-						translateTime: "SYS:h:MM:ss.l TT",
-						colorize: true,
-						ignore: "hostname",
-					},
-				},
-			},
+			logger: logger,
 		});
 
-		void fastifyInstance.register(fastifyStaticCompressPlugin, {
-			root: publicPath,
-			exclude: [apiPrefix], //routes that not contains static like api path must put
-			spa: true,
-		});
+		// void fastifyInstance.register(fastifyStaticCompressPlugin, {
+		// 	root: publicPath,
+		// 	exclude: [apiPrefix], //routes that not contains static like api path must put
+		// 	spa: true,
+		// });
 
 		try {
 			const host = isDev() ? "localhost" : "0.0.0.0";

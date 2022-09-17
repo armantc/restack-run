@@ -16,7 +16,11 @@
 		"build": "pnpm tsup-node"
 	},
 	"dependencies": {
+		"@fastify/compress": "^6.1.1",
+		"@fastify/static": "^6.5.0",
+		"@restack-run/utils": "workspace:*",
 		"fastify": "^4.5.2",
+		"mime": "^3.0.0",
 		"pino": "^8.5.0",
 		"pino-pretty": "^9.1.0"
 	}

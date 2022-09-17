@@ -1,20 +1,27 @@
 import pino,{transport} from "pino";
+import pretty from "pino-pretty";
+
+const stream = pretty({
+	colorize: true,
+	translateTime: "SYS:h:MM:ss.l TT",
+	ignore: "hostname", //for local debug hostname not need to take space on log
+});
 
 class Logger {
     _logger : pino.Logger;
 
     constructor()
     {
-        const _transport = transport({
-			target: "pino-pretty",
-			options: {
-				colorize: true,
-				translateTime: "SYS:h:MM:ss.l TT",
-				ignore: "hostname", //for local debug hostname not need to take space on log
-			},
-		});
+        // const _transport = transport({
+		// 	target: "pino-pretty",
+		// 	options: {
+		// 		colorize: true,
+		// 		translateTime: "SYS:h:MM:ss.l TT",
+		// 		ignore: "hostname", //for local debug hostname not need to take space on log
+		// 	},
+		// });
 
-        this._logger = pino({}, _transport);
+        this._logger = pino({}, stream);
 
         const errorHandler = (error, event) => {
 			this._logger.info(`${event} caught`);
