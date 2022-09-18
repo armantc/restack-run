@@ -16,8 +16,9 @@ const jsServerEntryPath = "src/server.entry.js";
 const tsServerEntryPath = "src/server.entry.ts";
 
 const defaultConfig: UserConfigExport = {
+	cacheDir : "cache",
+	outDir : "dist",
 	vite: {
-		cacheDir: "cache/.vite",
 		plugins: [
 			tsconfigPaths(),
 			viteReStackPlugin(),
@@ -48,13 +49,12 @@ const defaultConfig: UserConfigExport = {
 			legalComments: "none"
 		},
 		build: {
-			outDir: "dist/client",
 			sourcemap: true,
 			rollupOptions: {
 				output: {
 					sourcemapExcludeSources: true, //exclude source content from map in production, just line number and column
 					assetFileNames: (file) => {
-						const path = "static/$/[name]-[hash].[ext]";
+						const path = "assets/$/[name]-[hash].[ext]";
 
 						if (file?.name?.endsWith(".css"))
 							return path.replace("$", "css");
@@ -82,9 +82,7 @@ const defaultConfig: UserConfigExport = {
 	},
 	restack: {
 		apiPrefix: "/api",
-		cacheDir: "cache/.restack",
 		routesDir: "src/routes",
-		outDir: "dist/server",
 		outFile: "index.js",
 		port: 8080,
 	},

@@ -1,19 +1,7 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
-/* eslint-disable import/no-named-as-default-member */
 
 import commander from "commander";
-import fg from "fast-glob";
-import fs from "fs-extra";
-import esbuild from "esbuild";
 import path from "path";
-import rimraf from "rimraf";
-import PluginRestackTransform from "./esbuild-plugin-restack-transform";
-import chalk from "chalk";
-import chokidar from "chokidar";
-import lodash from "lodash";
-import { ChildProcessWithoutNullStreams, spawn } from "child_process";
-import logSymbols from "log-symbols";
 import vite from "./vite";
 import config from "./config";
 import restack from "./restack";
@@ -40,9 +28,10 @@ void config(options.config).then(async (config) => {
 	config.preview = options.preview;
 	config.independent = options.independent;
 
-	if(!config.build && !config.preview) //dev mode
-		config.restack.outDir = path.join(config.restack.cacheDir,config.restack.outDir)
-		.replaceAll("\\", "/");
+	config.vite.cacheDir = path.join(config.cacheDir, ".vite");
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	config.vite.build!.outDir = path.join(config.outDir, "static");
+
 
 	await restack(config);
 

@@ -18,10 +18,23 @@ const validRouteExts = ["js", "ts", "jsx", "tsx"];
 let nodeProcess: ChildProcessWithoutNullStreams;
 
 export default async function restack(config: UserConfig) {
-	const bundlePath = path.join(config.restack.outDir, config.restack.outFile);
+
+	let outDir = config.outDir;
+
+	const cacheDir = path.join(config.cacheDir, ".restack");
+
+	if(!config.build && !config.preview) //dev mode
+	{
+		outDir = cacheDir;
+	}
+
+	const bundlePath = path.join(outDir, config.restack.outFile);
 
 	if (config.preview) {
+		const bundlePathCJS = bundlePath.substring(0,bundlePath.lastIndexOf(".js")) + ".cjs";
 		if (fs.existsSync(bundlePath)) runServer(config, bundlePath);
+		else if(fs.existsSync(bundlePathCJS))
+			runServer(config, bundlePathCJS);
 		else
 			console.log(
 				chalk.red("failed"),
@@ -31,16 +44,16 @@ export default async function restack(config: UserConfig) {
 
 		return;
 	} else {
-		rimraf.sync(path.join(config.restack.outDir, "/**/*"));
+		rimraf.sync(path.join(outDir, "/**/*"));
 
-		generateServerEntry(config);
+		generateServerEntry(config,cacheDir);
 
 		const debounceRunServer = lodash.debounce(() => {
 			runServer(config, bundlePath);
 		}, 500);
 
 		const esbuildOpts: esbuild.BuildOptions = {
-			entryPoints: ["./cache/.restack/server.entry.js"], //must compare with destination and remove not existing entries
+			entryPoints: [generateEntryOutPath(cacheDir)], //must compare with destination and remove not existing entries
 			treeShaking: true, //remove dead code
 			platform: "node",
 			bundle: true,
@@ -92,7 +105,7 @@ export default async function restack(config: UserConfig) {
 		}
 
 		const debounceGenServerEntry = lodash.debounce(() => {
-			generateServerEntry(config);
+			generateServerEntry(config,cacheDir);
 		}, 500);
 
 		const onChange = (path: string) => {
@@ -146,7 +159,10 @@ function runServer(config: UserConfig, bundlePath: string) {
 	console.log(chalk.blue("START"), " server");
 }
 
-function generateServerEntry(config: UserConfig) {
+function generateServerEntry(config: UserConfig, cacheDir : string) {
+
+	const relativePath = path.relative(cacheDir, ".").replaceAll("\\", "/");
+
 	const entries = fg.sync(
 		`${path
 			.join(config.restack.routesDir, "/**/*")
@@ -163,7 +179,7 @@ function generateServerEntry(config: UserConfig) {
 	const registers: string[] = [];
 
 	for (const entry of entries) {
-		let importPath = path.join("../../", entry).replaceAll("\\", "/");
+		let importPath = path.join(relativePath, entry).replaceAll("\\", "/");
 
 		const importName = generateDefaultImportName(
 			entry,
@@ -187,24 +203,28 @@ function generateServerEntry(config: UserConfig) {
 	content += `
 	restackServer.start(
 		${config.restack.port},
-		"${config.restack.apiPrefix}",
-		"${path.relative(config.restack.outDir, config.vite.build?.outDir || "./")
-		.replaceAll("\\", "/")}"
+		"${config.restack.apiPrefix}"
 		);
 	`;
 
 	if (config.restack.serverEntryPath) {
-		const oSEntryContent = fs.readFileSync(config.restack.serverEntryPath, {
-			encoding: "utf-8",
-		});
-		content = oSEntryContent + content;
+		let entryImportPath = 
+			path.join(relativePath,config.restack.serverEntryPath).replaceAll("\\", "/");
+
+		entryImportPath = entryImportPath.substring(0,entryImportPath.lastIndexOf("."));
+
+		content = `import "${entryImportPath}";\r\n` + content;
 	}
 
-	const entryOutPath = path.join(config.restack.cacheDir, "server.entry.js");
+	const entryOutPath = generateEntryOutPath(cacheDir);
 
 	fs.outputFileSync(entryOutPath, content);
 
 	console.log(chalk.green("DONE"), " Write restack server entry file");
+}
+
+function generateEntryOutPath(cacheDir){
+	return path.join(cacheDir, "server.entry.js");
 }
 
 function generateDefaultImportName(entry: string, routesDir: string) {

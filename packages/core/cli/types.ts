@@ -2,17 +2,9 @@ import type { UserConfig as ViteUserConfig } from "vite";
 
 type RestackConfig = {
     /**
-     * relative path restack use for generate temp cache files
-     */
-	cacheDir: string;
-    /**
      * relative path define all app routes
      */
 	routesDir: string;
-    /**
-     * relative directory path restack write build files
-     */
-	outDir: string;
     /**
      * file name use for generated bundle file in outDir
      */
@@ -34,14 +26,13 @@ type RestackConfig = {
 };
 
 export type UserConfig = {
-	vite: ViteUserConfig;
-	restack: RestackConfig;
+    outDir : string;
+    cacheDir : string;
+    restack : RestackConfig;
+    vite : ViteUserConfig;
 	build?: boolean;
 	preview?: boolean;
 	independent?: boolean;
 };
 
-export type UserConfigExport = {
-	vite?: ViteUserConfig;
-	restack?: RestackConfig;
-};
+export type UserConfigExport = Omit<Partial<UserConfig>, "build" | "preview" | "independent">
