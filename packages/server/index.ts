@@ -19,7 +19,9 @@ function handleArguments(method: HTTPMethods, args: any[]): RouteOptions {
 	return options as RouteOptions;
 }
 
-type RouteShorthandOptions = Omit<RouteOptions, "method" | "handler">;
+type RouteShorthandOptions = Omit<RouteOptions, "method" | "handler" | "url"> & {
+	url? : string
+};
 class Server {
 	list: string[] = [];
 
