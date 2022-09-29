@@ -191,19 +191,27 @@ function generateServerEntry(config: UserConfig, cacheDir : string) {
 		imports.push(`import ${importName} from "${importPath}";`);
 
 		registers.push(
-			`restackServer.register(${importName},"${generateBasePath(
-				entry,
-				config.restack.routesDir
-			)}");`
+			`restackServer.register(${importName},"${convertToRoute(
+				entry.substring(config.restack.routesDir.length)
+			).url}");`
 		);
 	}
 
 	content += [...imports, ...registers].join("\r\n");
 
 	content += `
+	import rsnPath , { dirname as rsnDirname } from 'path';
+	import { fileURLToPath as rsnFileURLToPath } from 'url';
+	let rsnWorkingDir = import.meta.url;
+	if(rsnWorkingDir)
+		rsnWorkingDir = rsnDirname(rsnFileURLToPath(rsnWorkingDir));
+	else
+		rsnWorkingDir = __dirname;
+	
 	restackServer.start(
 		${config.restack.port},
-		"${config.restack.apiPrefix}"
+		"${config.restack.apiPrefix}",
+		rsnPath.join(rsnWorkingDir,"./static")
 		);
 	`;
 
@@ -235,10 +243,10 @@ function generateDefaultImportName(entry: string, routesDir: string) {
 	return defName;
 }
 
-function generateBasePath(entry: string, routesDir: string) {
-	const uri = entry.replace(routesDir, "");
+export function convertToRoute(relativeRoutePath) {
+	const parts = relativeRoutePath.split("/");
 
-	const parts = uri.split("/");
+	const params : string[] = [];
 
 	let fileName = parts[parts.length - 1];
 	fileName = fileName.substring(0, fileName.lastIndexOf("."));
@@ -247,11 +255,19 @@ function generateBasePath(entry: string, routesDir: string) {
 	if (fileName.toLowerCase() === "index") parts.pop();
 
 	parts.forEach((value, index, array) => {
-		if (value.startsWith("$")) value = value.replace("$", ":");
+		if (value.startsWith("$")){ 
+			value = value.replace("$", ":");
+			params.push((value as string).substring(1))
+		}
 		array[index] = value;
 	});
 
-	const route = parts.join("/");
+	let url = parts.join("/");
 
-	return route === "" ? "/" : route;
+	url = url === "" ? "/" : url;
+
+	return {
+		url,
+		params
+	}
 }

@@ -1,5 +1,6 @@
 import server from "@restack-run/server";
 import {max} from "@/test";
+import path from "path";
 
 function test(param: any) {
 	return "ali";
@@ -8,10 +9,19 @@ function test(param: any) {
 export const definition = server.get(() => {
 	max();
 
-	return "ali";
-	console.log("some callback puted here");
+	console.log(path.join("./","/name"));
 
-	console.log("some code");
+	return "ali";
+});
+
+//todo vite restack plugin must regenerate with need props and remove functions on options and any 
+// extra vars
+export const test2 = server.post({
+	onRequest : (req,rep,done) => {
+		//
+	}
+},()=> {
+	//
 });
 
 export default function Dashboard() {

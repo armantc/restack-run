@@ -1,4 +1,4 @@
-import { isDev } from '@restack-run/utils';
+import { isDev } from "@restack-run/utils";
 import fastify from "fastify";
 import type { RouteOptions, RouteHandlerMethod, HTTPMethods } from "fastify";
 import logger from "./logger";
@@ -19,13 +19,23 @@ function handleArguments(method: HTTPMethods, args: any[]): RouteOptions {
 	return options as RouteOptions;
 }
 
-type RouteShorthandOptions = Omit<RouteOptions, "method" | "handler" | "url"> & {
-	url? : string
+type RouteShorthandOptions = Pick<
+	RouteOptions,
+	| "schema"
+	| "attachValidation"
+	| "exposeHeadRoute"
+	| "bodyLimit"
+	| "logLevel"
+	| "version"
+> & {
+	url?: string;
+	method?: string;
 };
-class Server {
-	list: string[] = [];
 
-	route(options: RouteOptions) {
+class Server {
+	private list: string[] = [];
+
+	private route(options: RouteOptions) {
 		return options;
 	}
 
@@ -74,16 +84,16 @@ class Server {
 	}
 
 	async start(port: 8080, apiPrefix, publicPath) {
-
 		const fastifyInstance = fastify({
 			logger: logger,
 		});
 
-		// void fastifyInstance.register(fastifyStaticCompressPlugin, {
-		// 	root: publicPath,
-		// 	exclude: [apiPrefix], //routes that not contains static like api path must put
-		// 	spa: true,
-		// });
+		if (!isDev())
+			void fastifyInstance.register(fastifyStaticCompressPlugin, {
+				root: publicPath,
+				exclude: [apiPrefix], //routes that not contains static like api path must put
+				spa: true,
+			});
 
 		try {
 			const host = isDev() ? "localhost" : "0.0.0.0";

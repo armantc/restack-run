@@ -1,6 +1,6 @@
 import type { UserConfig as ViteUserConfig } from "vite";
 
-type RestackConfig = {
+export type RestackConfig = {
     /**
      * relative path define all app routes
      */

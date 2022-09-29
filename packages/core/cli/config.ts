@@ -5,7 +5,7 @@ import svgrPlugin from "vite-plugin-svgr";
 //import legacy from "@vitejs/plugin-legacy";
 import viteReStackPlugin from "../vite-plugin";
 import tsconfigPaths from "vite-tsconfig-paths";
-import type { UserConfig,UserConfigExport } from "./types";
+import type { UserConfig, UserConfigExport } from "./types";
 
 import fs from "fs-extra";
 
@@ -16,12 +16,10 @@ const jsServerEntryPath = "src/server.entry.js";
 const tsServerEntryPath = "src/server.entry.ts";
 
 const defaultConfig: UserConfigExport = {
-	cacheDir : "cache",
-	outDir : "dist",
+	cacheDir: "cache",
+	outDir: "dist",
 	vite: {
 		plugins: [
-			tsconfigPaths(),
-			viteReStackPlugin(),
 			// legacy({
 			// 	targets: ["defaults", "not IE 11"],
 			// }),
@@ -46,7 +44,7 @@ const defaultConfig: UserConfigExport = {
 		esbuild: {
 			banner: "/* ReStack APP",
 			footer: "/* https://restack.run */",
-			legalComments: "none"
+			legalComments: "none",
 		},
 		build: {
 			sourcemap: true,
@@ -88,36 +86,54 @@ const defaultConfig: UserConfigExport = {
 	},
 };
 
-export default async function config(configFile) : Promise<UserConfig> {
+export default async function config(configFile): Promise<UserConfig> {
 	if (!configFile) {
 		configFile =
 			(fs.existsSync(tsConfigPath) && tsConfigPath) ||
-			(fs.existsSync(jsConfigPath) && jsConfigPath) || undefined;
+			(fs.existsSync(jsConfigPath) && jsConfigPath) ||
+			undefined;
 	}
 
-	let config : any = {};
+	let config: any = {};
 
-	if(configFile){
+	if (configFile) {
 		config = await loadConfigFromFile(
-		{
-			command: "build",
-			mode: "development",
-		},
-		configFile
-	);
+			{
+				command: "build",
+				mode: "development",
+			},
+			configFile
+		);
 	}
 
-	const mergedConfig : UserConfig = mergeConfig(defaultConfig, config.config) as UserConfig;
+	const mergedConfig: UserConfig = mergeConfig(
+		defaultConfig,
+		config.config
+	) as UserConfig;
 
-	if(!mergedConfig.restack.serverEntryPath)
-	{
+	mergedConfig.vite.plugins = [
+		...[tsconfigPaths(), viteReStackPlugin(mergedConfig.restack)],
+		...(mergedConfig.vite.plugins as Array<any>),
+	];
+
+	if (mergedConfig.restack.routesDir.startsWith(".."))
+		throw new Error(
+			"Restack routesDir config must start from same config folder so .. not allowed"
+		);
+	else if (mergedConfig.restack.routesDir.startsWith("./"))
+		mergedConfig.restack.routesDir =
+			mergedConfig.restack.routesDir.substring(2);
+	else if (mergedConfig.restack.routesDir.startsWith("/"))
+		mergedConfig.restack.routesDir =
+			mergedConfig.restack.routesDir.substring(1);
+
+	if (!mergedConfig.restack.serverEntryPath) {
 		mergedConfig.restack.serverEntryPath =
 			(fs.existsSync(tsServerEntryPath) && tsServerEntryPath) ||
 			(fs.existsSync(jsServerEntryPath) && jsServerEntryPath) ||
 			undefined;
-	}else
-	{
-		if(fs.existsSync(mergedConfig.restack.serverEntryPath))
+	} else {
+		if (fs.existsSync(mergedConfig.restack.serverEntryPath))
 			throw new Error(
 				`server entry file not found on path : ${mergedConfig.restack.serverEntryPath}`
 			);
@@ -126,6 +142,6 @@ export default async function config(configFile) : Promise<UserConfig> {
 	return mergedConfig;
 }
 
-export function defineConfig(config: UserConfigExport) : UserConfigExport {
-    return config;
+export function defineConfig(config: UserConfigExport): UserConfigExport {
+	return config;
 }

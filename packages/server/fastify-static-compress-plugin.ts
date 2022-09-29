@@ -5,9 +5,9 @@ import path from "path";
 import fastifyCompress from "@fastify/compress";
 import fastifyStatic from "@fastify/static";
 import { isDev } from "@restack-run/utils";
-import logger from "./logger";
 
 export default function (fastify, options, done) {
+
 	options = options || {};
 	if (typeof options.spa === "undefined") options.spa = true;
 
@@ -21,8 +21,6 @@ export default function (fastify, options, done) {
 	// create a express.static middleware to handle serving files
 	const compressions : any[] = [];
 	const files = {};
-
-	options.root = path.join(path.resolve(), options.root);
 
 	// read compressions from options
 	setupCompressions();

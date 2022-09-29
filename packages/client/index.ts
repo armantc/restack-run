@@ -4,12 +4,8 @@ export const isDev = function () {
 	);
 };
 
-export function get(){
-    console.log("Get Method from client");
+function route(options){
+	console.log("route called with opts", options);
 }
 
-export function post(){
-    console.log("Post Method");
-}
-
-export default {get,post}
+export default {route}

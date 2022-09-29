@@ -26,6 +26,7 @@
 		"@babel/parser": "^7.18.13",
 		"@babel/plugin-transform-typescript": "^7.18.12",
 		"@babel/traverse": "^7.18.13",
+		"@babel/types": "^7.19.0",
 		"@vitejs/plugin-legacy": "^2.1.0",
 		"@vitejs/plugin-react": "^2.1.0",
 		"babel-plugin-tsconfig-paths": "^1.0.3",

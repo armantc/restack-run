@@ -6,6 +6,8 @@ import path from "path";
 import { nanoid } from "nanoid";
 import fs from "fs-extra";
 
+const RESTACK_SERVER_PKG_NAME = "@restack-run/server";
+
 const restackTransform = {
 	report: () => "Restack RemoveJSX Plugin",
 	fix: ({ path, removePath, replaceWith, replaceWithMultiple }) => {
@@ -189,7 +191,7 @@ function handleReStackCall(push, path, listStore, store) {
 
 	const calleeName = callee.name || callee.object.name;
 
-	const restackCalls = store("@restack-run/server");
+	const restackCalls = store(RESTACK_SERVER_PKG_NAME);
 
 	if (restackCalls) {
 		for (const sCaller of restackCalls) {
@@ -205,6 +207,9 @@ function handleReStackCall(push, path, listStore, store) {
 
 function handleImportDeclaration(path, store) {
 	const pkg = path.node.source.value;
+
+	if(pkg != RESTACK_SERVER_PKG_NAME)
+		return;
 
 	if (!store(pkg)) store(pkg, []);
 
