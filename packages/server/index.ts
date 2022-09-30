@@ -35,46 +35,19 @@ type RouteShorthandOptions = Pick<
 class Server {
 	private list: string[] = [];
 
-	private route(options: RouteOptions) {
-		return options;
+	private route(options: RouteShorthandOptions, handler: RouteHandlerMethod);
+	private route(handler: RouteHandlerMethod);
+	private route(...args) {
+		logger.info("route added");
+		//return handleArguments("GET", args);
 	}
 
-	get(options: RouteShorthandOptions, handler: RouteHandlerMethod);
-	get(handler: RouteHandlerMethod);
-	get(...args) {
-		logger.info("get route added");
-		return handleArguments("GET", args);
-	}
-
-	head(options: RouteShorthandOptions, handler: RouteHandlerMethod);
-	head(handler: RouteHandlerMethod);
-	head(...args) {
-		return handleArguments("HEAD", args);
-	}
-
-	post(options: RouteShorthandOptions, handler: RouteHandlerMethod);
-	post(handler: RouteHandlerMethod);
-	post(...args) {
-		return handleArguments("POST", args);
-	}
-
-	put(options: RouteShorthandOptions, handler: RouteHandlerMethod);
-	put(handler: RouteHandlerMethod);
-	put(...args) {
-		return handleArguments("PUT", args);
-	}
-
-	patch(options: RouteShorthandOptions, handler: RouteHandlerMethod);
-	patch(handler: RouteHandlerMethod);
-	patch(...args) {
-		return handleArguments("PATCH", args);
-	}
-
-	delete(options: RouteShorthandOptions, handler: RouteHandlerMethod);
-	delete(handler: RouteHandlerMethod);
-	delete(...args) {
-		return handleArguments("DELETE", args);
-	}
+	get = this.route;
+	head = this.route;
+	post = this.route;
+	put = this.route;
+	patch = this.route;
+	delete = this.route;
 
 	register(routes, baseApiPath) {
 		//path is base path
