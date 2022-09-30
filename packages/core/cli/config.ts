@@ -68,15 +68,7 @@ const defaultConfig: UserConfigExport = {
 					},
 				},
 			},
-		},
-		server: {
-			proxy: {
-				"/api": {
-					target: "http://localhost:8080",
-					changeOrigin: true,
-				},
-			},
-		},
+		}
 	},
 	restack: {
 		apiPrefix: "/api",
@@ -126,6 +118,15 @@ export default async function config(configFile): Promise<UserConfig> {
 	else if (mergedConfig.restack.routesDir.startsWith("/"))
 		mergedConfig.restack.routesDir =
 			mergedConfig.restack.routesDir.substring(1);
+
+	mergedConfig.vite.server = {
+		proxy: {
+			[mergedConfig.restack.apiPrefix]: {
+				target: `http://localhost:${mergedConfig.restack.port}`,
+				changeOrigin: true,
+			},
+		},
+	};
 
 	if (!mergedConfig.restack.serverEntryPath) {
 		mergedConfig.restack.serverEntryPath =
