@@ -117,11 +117,11 @@ function handleReStackCall(route, push, path, store) {
 	const restackCalls = store(RESTACK_SERVER_PKG_NAME);
 
 	if (restackCalls) {
+
+		const method = callee.property.name.toUpperCase();
+
 		for (const sCaller of restackCalls) {
-			if (
-				calleeName === sCaller &&
-				HTTP_METHODS.includes(callee.property.name.toUpperCase())
-			) {
+			if (calleeName === sCaller && HTTP_METHODS.includes(method)) {
 				const nArguments = path.node.arguments;
 
 				const params: types.StringLiteral[] = [];
@@ -141,7 +141,7 @@ function handleReStackCall(route, push, path, store) {
 					),
 					types.objectProperty(
 						types.identifier("method"),
-						types.stringLiteral(callee.property.name.toUpperCase())
+						types.stringLiteral(method)
 					),
 				]);
 
@@ -174,6 +174,10 @@ function handleReStackCall(route, push, path, store) {
 						path,
 						replaceWith,
 					});
+			} else {
+				throw new Error(
+					`Method ${method} not exist or not supported inside route files`
+				);
 			}
 		}
 	}

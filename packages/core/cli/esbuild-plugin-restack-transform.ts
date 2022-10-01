@@ -199,9 +199,12 @@ function handleReStackCall(url:string,push, path, listStore, store) {
 
 	if (restackCalls) {
 		for (const sCaller of restackCalls) {
+
+			const method = callee.property.name.toUpperCase();
+
 			if (
 				calleeName === sCaller &&
-				HTTP_METHODS.includes(callee.property.name.toUpperCase())
+				HTTP_METHODS.includes(method)
 			) {
 				const parent = path.parentPath;
 				if (parent.isVariableDeclarator()) {
@@ -217,7 +220,7 @@ function handleReStackCall(url:string,push, path, listStore, store) {
 					),
 					types.objectProperty(
 						types.identifier("method"),
-						types.stringLiteral(callee.property.name.toUpperCase())
+						types.stringLiteral(method)
 					),
 				]);
 
@@ -252,6 +255,8 @@ function handleReStackCall(url:string,push, path, listStore, store) {
 						path,
 						replaceWith,
 					});
+			}else{
+				throw new Error(`Method ${method} not exist or not supported inside route files`);
 			}
 		}
 	}
