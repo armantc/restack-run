@@ -176,7 +176,6 @@ function generateServerEntry(config: UserConfig, cacheDir : string) {
 	let content = 'import restackServer from "@restack-run/server";\r\n';
 
 	const imports: string[] = [];
-	const registers: string[] = [];
 
 	for (const entry of entries) {
 		let importPath = path.join(relativePath, entry).replaceAll("\\", "/");
@@ -190,14 +189,9 @@ function generateServerEntry(config: UserConfig, cacheDir : string) {
 
 		imports.push(`import ${importName} from "${importPath}";`);
 
-		registers.push(
-			`restackServer.register(${importName},"${convertToRoute(
-				entry.substring(config.restack.routesDir.length)
-			).url}");`
-		);
 	}
 
-	content += [...imports, ...registers].join("\r\n");
+	content += imports.join("\n");
 
 	content += `
 	import rsnPath , { dirname as rsnDirname } from 'path';

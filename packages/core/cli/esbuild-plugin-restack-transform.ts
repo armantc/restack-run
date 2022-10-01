@@ -1,3 +1,4 @@
+/* eslint-disable import/no-named-as-default-member */
 import { UserConfig } from "./types";
 import esbuild from "esbuild";
 import putout, { types, operator } from "putout";
@@ -5,69 +6,73 @@ import convert from "convert-source-map";
 import path from "path";
 import { nanoid } from "nanoid";
 import fs from "fs-extra";
+import { RESTACK_SERVER_PKG_NAME, HTTP_METHODS } from "./consts";
+import { convertToRoute } from "./restack";
 
-const RESTACK_SERVER_PKG_NAME = "@restack-run/server";
+const restackTransform = (url: string) => {
+	return {
+		report: () => "Restack RemoveJSX Plugin",
+		fix: ({ path, removePath, replaceWith, replaceWithMultiple }) => {
+			if (removePath) path.remove();
 
-const restackTransform = {
-	report: () => "Restack RemoveJSX Plugin",
-	fix: ({ path, removePath, replaceWith, replaceWithMultiple }) => {
-		if (removePath) path.remove();
+			if (replaceWith) operator.replaceWith(path, replaceWith);
 
-		if (replaceWith) operator.replaceWith(path, replaceWith);
-
-		if (replaceWithMultiple)
-			operator.replaceWithMultiple(path, replaceWithMultiple);
-	},
-	traverse: ({ push, listStore, store }) => ({
-		ImportDeclaration(path) {
-			handleImportDeclaration(path, store);
+			if (replaceWithMultiple)
+				operator.replaceWithMultiple(path, replaceWithMultiple);
 		},
-		JSXElement(path) {
-			handleJSXElement(push, path, listStore);
-		},
-
-		CallExpression(path) {
-			handleReStackCall(push, path, listStore, store);
-		},
-
-		ExportSpecifier(path) {
-			handleExport(push, path, listStore);
-		},
-
-		ExportDefaultDeclaration(path) {
-			handleExport(push, path, listStore);
-		},
-
-		Program: {
-			enter: (path) => {
-				const defaultExport = operator.getExportDefault(path);
-
-				if (!defaultExport)
-					path.node.body.push(
-						types.ExportDefaultDeclaration(
-							types.ObjectExpression([])
-						)
-					);
+		traverse: ({ push, listStore, store }) => ({
+			ImportDeclaration(path) {
+				handleImportDeclaration(path, store);
 			},
-			exit: (path) => {
-				const defaultExport = operator.getExportDefault(path);
-
-				if (!defaultExport) {
-					const exp = generateDefaultExport(listStore);
-					if (exp)
-						path.node.body.push(generateDefaultExport(listStore));
-				}
+			JSXElement(path) {
+				handleJSXElement(push, path, listStore);
 			},
-		},
-	}),
+
+			CallExpression(path) {
+				handleReStackCall(url,push, path, listStore, store);
+			},
+
+			ExportSpecifier(path) {
+				handleExport(push, path, listStore);
+			},
+
+			ExportDefaultDeclaration(path) {
+				handleExport(push, path, listStore);
+			},
+
+			Program: {
+				enter: (path) => {
+					const defaultExport = operator.getExportDefault(path);
+
+					if (!defaultExport)
+						path.node.body.push(
+							types.ExportDefaultDeclaration(
+								types.ObjectExpression([])
+							)
+						);
+				},
+				exit: (path) => {
+					const defaultExport = operator.getExportDefault(path);
+
+					if (!defaultExport) {
+						const exp = generateDefaultExport(listStore);
+						if (exp)
+							path.node.body.push(
+								generateDefaultExport(listStore)
+							);
+					}
+				},
+			},
+		}),
+	};
 };
 
 function generateDefaultExport(listStore) {
 	const properties = [];
 
 	if (listStore().length > 0) {
-		for (const { name, route } of listStore()) {
-			if (route) {
+		for (const { name, isRoute } of listStore()) {
+			if (isRoute) {
 				properties.push(
 					types.ObjectProperty(
 						types.Identifier(name),
@@ -186,7 +191,7 @@ function handleJSXElement(push, path, listStore) {
 	}
 }
 
-function handleReStackCall(push, path, listStore, store) {
+function handleReStackCall(url:string,push, path, listStore, store) {
 	const callee = path.node.callee;
 
 	const calleeName = callee.name || callee.object.name;
@@ -195,11 +200,59 @@ function handleReStackCall(push, path, listStore, store) {
 
 	if (restackCalls) {
 		for (const sCaller of restackCalls) {
-			if (calleeName === sCaller) {
+			if (
+				calleeName === sCaller &&
+				HTTP_METHODS.includes(callee.property.name.toUpperCase())
+			) {
 				const parent = path.parentPath;
 				if (parent.isVariableDeclarator()) {
-					listStore({ name: parent.node.id.name, route: true });
+					listStore({ name: parent.node.id.name, isRoute: true });
 				}
+
+				const nArguments : Array<any> = path.node.arguments;
+
+				const defOpts = types.objectExpression([
+					types.objectProperty(
+						types.identifier("url"),
+						types.stringLiteral(url)
+					),
+					types.objectProperty(
+						types.identifier("method"),
+						types.stringLiteral(callee.property.name.toUpperCase())
+					),
+				]);
+
+				const replaceMember = types.memberExpression(
+					types.identifier(calleeName),
+					types.identifier("route")
+				);
+
+				let replaceWith;
+
+				if (nArguments.length === 0) {
+					throw new Error(
+						`Route definition must have at least one handler argument`
+					);
+				} else if (nArguments.length === 1) {
+					replaceWith = types.callExpression(replaceMember, [
+						defOpts,
+						...nArguments
+					]);
+				} else {
+					replaceWith = types.callExpression(replaceMember, [
+						types.objectExpression([
+							types.spreadElement(nArguments[0]),
+							types.spreadElement(defOpts),
+						]),
+						...nArguments.slice(1)
+					]);
+				}
+
+				if (replaceWith)
+					push({
+						path,
+						replaceWith,
+					});
 			}
 		}
 	}
@@ -208,8 +261,7 @@ function handleReStackCall(push, path, listStore, store) {
 function handleImportDeclaration(path, store) {
 	const pkg = path.node.source.value;
 
-	if(pkg != RESTACK_SERVER_PKG_NAME)
-		return;
+	if (pkg != RESTACK_SERVER_PKG_NAME) return;
 
 	if (!store(pkg)) store(pkg, []);
 
@@ -221,15 +273,21 @@ function handleImportDeclaration(path, store) {
 	}
 }
 
-function transform({ id, source }) {
+function transform({ id, source, routesDirAbsPath }) {
+	routesDirAbsPath = routesDirAbsPath.replaceAll("\\", "/");
+
+	const route = convertToRoute(
+		id.replaceAll("\\", "/").substring(routesDirAbsPath.length)
+	);
+
 	const plugins: any[] = [
-		["restack-transform", restackTransform],
+		["restack-transform", restackTransform(route.url)],
 		"remove-useless-functions",
 		"remove-unreachable-code",
 		"remove-empty",
 		"remove-unreferenced-variables",
 		"remove-unused-expressions",
-		// "remove-unused-variables", //todo must handle this but prevent not to remove server codes
+		"remove-unused-variables", //todo must handle this but prevent not to remove server codes
 	];
 
 	const isTS = id.endsWith(".ts") || id.endsWith(".tsx");
@@ -253,37 +311,45 @@ function transform({ id, source }) {
 	return out.code;
 }
 
-const PluginRestackTransform = (config: UserConfig): esbuild.Plugin => ({
-	name: "RestackTransform",
-	setup(build) {
-		build.onLoad({ filter: /.*\.(tsx|jsx|ts|js)$/ }, async (args) => {
+const PluginRestackTransform = (config: UserConfig): esbuild.Plugin => {
 
-			const routesAbsPath = path.join(process.cwd(),config.restack.routesDir);
+	const routesDirAbsPath = path.join(process.cwd(), config.restack.routesDir)
+	.replaceAll("\\", "/");
 
-			//just transform routes
-			//todo maybe need exclude importers too
-			if (!args.path.startsWith(routesAbsPath)) {
-				return {}
-			}
+	return {
+		name: "RestackTransform",
+		setup(build) {
+			build.onLoad({ filter: /.*\.(tsx|jsx|ts|js)$/ }, async (args) => {
 
-			const source = await fs.readFile(args.path, {
-				encoding: "utf-8",
+				//just transform routes
+				//todo maybe need exclude importers too
+				if (!args.path.replaceAll("\\", "/").startsWith(routesDirAbsPath)) {
+					return {};
+				}
+
+				const source = await fs.readFile(args.path, {
+					encoding: "utf-8",
+				});
+
+				const out = transform({
+					id: args.path,
+					source,
+					routesDirAbsPath
+				});
+
+				let loader = "js";
+
+				if (args.path.endsWith("tsx")) loader = "tsx";
+				if (args.path.endsWith("jsx")) loader = "jsx";
+				if (args.path.endsWith("ts")) loader = "ts";
+
+				return {
+					contents: out,
+					loader: loader,
+				} as esbuild.OnLoadResult;
 			});
-
-			const out = transform({ id: args.path, source: source });
-
-			let loader = "js";
-
-			if (args.path.endsWith("tsx")) loader = "tsx";
-			if (args.path.endsWith("jsx")) loader = "jsx";
-			if (args.path.endsWith("ts")) loader = "ts";
-
-			return {
-				contents: out,
-				loader: loader,
-			} as esbuild.OnLoadResult;
-		});
-	},
-});
+		},
+	};
+};
 
 export default PluginRestackTransform;
