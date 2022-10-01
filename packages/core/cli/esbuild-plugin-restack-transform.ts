@@ -2,7 +2,6 @@
 import { UserConfig } from "./types";
 import esbuild from "esbuild";
 import putout, { types, operator } from "putout";
-import convert from "convert-source-map";
 import path from "path";
 import { nanoid } from "nanoid";
 import fs from "fs-extra";
@@ -300,14 +299,7 @@ function transform({ id, source, routesDirAbsPath }) {
 		sourceMapName: path.parse(id).name,
 		plugins,
 	});
-
-	//console.log(out.code);
-
-	// const _convert = convert.fromSource(out.code);
-
-	// _convert.sourcemap.sourcesContent = null;
-
-	//return { code: convert.removeComments(out.code), map: _convert.sourcemap };
+	
 	return out.code;
 }
 

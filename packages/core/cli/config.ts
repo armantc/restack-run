@@ -3,8 +3,6 @@ import react from "@vitejs/plugin-react";
 import viteCompression from "vite-plugin-compression";
 import svgrPlugin from "vite-plugin-svgr";
 //import legacy from "@vitejs/plugin-legacy";
-import viteReStackPlugin from "../vite-plugin";
-import tsconfigPaths from "vite-tsconfig-paths";
 import type { UserConfig, UserConfigExport } from "./types";
 
 import fs from "fs-extra";
@@ -102,11 +100,6 @@ export default async function config(configFile): Promise<UserConfig> {
 		defaultConfig,
 		config.config
 	) as UserConfig;
-
-	mergedConfig.vite.plugins = [
-		...[tsconfigPaths(), viteReStackPlugin(mergedConfig.restack)],
-		...(mergedConfig.vite.plugins as Array<any>),
-	];
 
 	if (mergedConfig.restack.routesDir.startsWith(".."))
 		throw new Error(
