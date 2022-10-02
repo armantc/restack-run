@@ -28,7 +28,7 @@ const restackTransform = (url: string) => {
 			},
 
 			CallExpression(path) {
-				handleReStackCall(url,push, path, listStore, store);
+				handleReStackCall(url, push, path, listStore, store);
 			},
 
 			ExportSpecifier(path) {
@@ -190,7 +190,7 @@ function handleJSXElement(push, path, listStore) {
 	}
 }
 
-function handleReStackCall(url:string,push, path, listStore, store) {
+function handleReStackCall(url: string, push, path, listStore, store) {
 	const callee = path.node.callee;
 
 	const calleeName = callee.name || callee.object.name;
@@ -199,19 +199,17 @@ function handleReStackCall(url:string,push, path, listStore, store) {
 
 	if (restackCalls) {
 		for (const sCaller of restackCalls) {
+			if (calleeName === sCaller) {
+				const method = callee.property.name.toUpperCase();
 
-			const method = callee.property.name.toUpperCase();
+				if (!HTTP_METHODS.includes(method)) return;
 
-			if (
-				calleeName === sCaller &&
-				HTTP_METHODS.includes(method)
-			) {
 				const parent = path.parentPath;
 				if (parent.isVariableDeclarator()) {
 					listStore({ name: parent.node.id.name, isRoute: true });
 				}
 
-				const nArguments : Array<any> = path.node.arguments;
+				const nArguments: Array<any> = path.node.arguments;
 
 				const defOpts = types.objectExpression([
 					types.objectProperty(
@@ -238,7 +236,7 @@ function handleReStackCall(url:string,push, path, listStore, store) {
 				} else if (nArguments.length === 1) {
 					replaceWith = types.callExpression(replaceMember, [
 						defOpts,
-						...nArguments
+						...nArguments,
 					]);
 				} else {
 					replaceWith = types.callExpression(replaceMember, [
@@ -246,7 +244,7 @@ function handleReStackCall(url:string,push, path, listStore, store) {
 							types.spreadElement(nArguments[0]),
 							types.spreadElement(defOpts),
 						]),
-						...nArguments.slice(1)
+						...nArguments.slice(1),
 					]);
 				}
 
@@ -255,8 +253,6 @@ function handleReStackCall(url:string,push, path, listStore, store) {
 						path,
 						replaceWith,
 					});
-			}else{
-				throw new Error(`Method ${method} not exist or not supported inside route files`);
 			}
 		}
 	}
@@ -304,23 +300,26 @@ function transform({ id, source, routesDirAbsPath }) {
 		sourceMapName: path.parse(id).name,
 		plugins,
 	});
-	
+
 	return out.code;
 }
 
 const PluginRestackTransform = (config: UserConfig): esbuild.Plugin => {
-
-	const routesDirAbsPath = path.join(process.cwd(), config.restack.routesDir)
-	.replaceAll("\\", "/");
+	const routesDirAbsPath = path
+		.join(process.cwd(), config.restack.routesDir)
+		.replaceAll("\\", "/");
 
 	return {
 		name: "RestackTransform",
 		setup(build) {
 			build.onLoad({ filter: /.*\.(tsx|jsx|ts|js)$/ }, async (args) => {
-
 				//just transform routes
 				//todo maybe need exclude importers too
-				if (!args.path.replaceAll("\\", "/").startsWith(routesDirAbsPath)) {
+				if (
+					!args.path
+						.replaceAll("\\", "/")
+						.startsWith(routesDirAbsPath)
+				) {
 					return {};
 				}
 
@@ -331,7 +330,7 @@ const PluginRestackTransform = (config: UserConfig): esbuild.Plugin => {
 				const out = transform({
 					id: args.path,
 					source,
-					routesDirAbsPath
+					routesDirAbsPath,
 				});
 
 				let loader = "js";

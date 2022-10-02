@@ -1,5 +1,5 @@
 /* eslint-disable import/no-named-as-default-member */
-import { UserConfig } from './types';
+import { UserConfig } from "./types";
 import { createServer, build, PluginOption } from "vite";
 import merge from "lodash/merge.js";
 import putout, { operator } from "putout";
@@ -11,16 +11,14 @@ import { convertToRoute } from "../cli/restack";
 import { RESTACK_SERVER_PKG_NAME, HTTP_METHODS } from "../cli/consts";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-export default async function vite( config : UserConfig ){
-
+export default async function vite(config: UserConfig) {
 	config.vite.plugins = [
 		...[tsconfigPaths(), viteReStackPlugin(config.restack)],
 		...(config.vite.plugins as Array<any>),
 	];
 
-	if(!(config.build || config.preview)) //development mode 
-	{
-
+	if (!(config.build || config.preview)) {
+		//development mode
 		const devConfig = {
 			build: { target: "es2020" },
 			optimizeDeps: {
@@ -35,10 +33,9 @@ export default async function vite( config : UserConfig ){
 
 		await server.listen();
 		server.printUrls();
-	}else{
+	} else {
 		//production build
-		if(config.build)
-			await build(config.vite);
+		if (config.build) await build(config.vite);
 	}
 }
 
@@ -65,7 +62,9 @@ const viteReStackPlugin = (config: RestackConfig): PluginOption => {
 						"typescript",
 						[
 							"replace-restack-server-plugin",
-							replaceRestackServerPlugin(id.substring(routesAbsPath.length)),
+							replaceRestackServerPlugin(
+								id.substring(routesAbsPath.length)
+							),
 						],
 						"remove-unused-variables",
 						"remove-useless-functions",
@@ -81,8 +80,8 @@ const viteReStackPlugin = (config: RestackConfig): PluginOption => {
 				};
 			}
 		},
-	}
-}
+	};
+};
 
 const replaceRestackServerPlugin = (relativeId: string) => {
 	const route = convertToRoute(relativeId);
@@ -117,7 +116,6 @@ function handleReStackCall(route, push, path, store) {
 	const restackCalls = store(RESTACK_SERVER_PKG_NAME);
 
 	if (restackCalls) {
-
 		const method = callee.property.name.toUpperCase();
 
 		for (const sCaller of restackCalls) {
@@ -175,9 +173,10 @@ function handleReStackCall(route, push, path, store) {
 						replaceWith,
 					});
 			} else {
-				throw new Error(
-					`Method ${method} not exist or not supported inside route files`
-				);
+				if (method !== "ROUTE")
+					throw new Error(
+						`Method ${method} not exist or not supported inside route files`
+					);
 			}
 		}
 	}
