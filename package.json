@@ -6,7 +6,8 @@
 	"license": "MIT",
 	"packageManager": "pnpm@7.11.0",
 	"scripts": {
-		"preinstall": "npx only-allow pnpm"
+		"preinstall": "npx only-allow pnpm",
+		"build" : "pnpm -r --filter \"@restack-run/*\" build"
 	},
 	"devDependencies": {
 		"@types/node": "^18.7.11",

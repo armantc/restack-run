@@ -5,10 +5,10 @@ import merge from "lodash/merge.js";
 import putout, { operator } from "putout";
 import path from "path";
 import convert from "convert-source-map";
-import type { RestackConfig } from "../cli/types";
+import type { RestackConfig } from "./types";
 import types from "@babel/types";
-import { convertToRoute } from "../cli/restack";
-import { RESTACK_SERVER_PKG_NAME, HTTP_METHODS } from "../cli/consts";
+import { convertToRoute } from "./restack";
+import { RESTACK_SERVER_PKG_NAME, HTTP_METHODS } from "./consts";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default async function vite(config: UserConfig) {

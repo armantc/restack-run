@@ -56,6 +56,8 @@
 		"vite-tsconfig-paths": "^3.5.0"
 	},
 	"devDependencies": {
+		"@restack-run/client": "workspace:*",
+		"@restack-run/server": "workspace:*",
 		"@types/fs-extra": "^9.0.13",
 		"@types/lodash": "^4.14.184"
 	}
