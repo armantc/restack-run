@@ -1,5 +1,6 @@
 {
 	"name": "@restack-run/core",
+	"version": "1.0.0",
 	"main": "dist/index.js",
 	"typings": "dist/index.d.ts",
 	"type": "module",
@@ -23,6 +24,8 @@
 		"build": "pnpm tsup-node"
 	},
 	"dependencies": {
+		"@babel/core": "7.19.3",
+		"terser": "5.15.0",
 		"@babel/parser": "^7.18.13",
 		"@babel/plugin-transform-typescript": "^7.18.12",
 		"@babel/traverse": "^7.18.13",

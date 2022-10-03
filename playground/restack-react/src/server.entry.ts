@@ -1,4 +1,4 @@
 //no code provided yet
 import fs from "fs";
 
-console.log("hereee from entry 2");
+console.log("Server entry imported successfully");

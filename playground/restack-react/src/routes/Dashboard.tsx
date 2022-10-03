@@ -6,12 +6,9 @@ function test(param: any) {
 	return "ali";
 }
 
-export const definition = server.get(() => {
-	max();
+export const definition = server.get(async () => {
 
-	console.log(path.join("./","/name"));
-
-	return "ali";
+	return {name :"ali 2"};
 });
 
 //todo vite restack plugin must regenerate with need props and remove functions on options and any 
