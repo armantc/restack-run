@@ -16,5 +16,8 @@
 	},
 	"scripts": {
 		"build": "pnpm tsup"
+	},
+	"dependencies": {
+		"qs" : "^6.11.0"
 	}
 }

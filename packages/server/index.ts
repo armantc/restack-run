@@ -1,3 +1,4 @@
+/* eslint-disable import/no-named-as-default-member */
 /* eslint-disable import/no-named-as-default */
 import { isDev } from "@restack-run/utils";
 import fastify, { FastifyInstance } from "fastify";
@@ -5,6 +6,7 @@ import type { RouteOptions, RouteHandlerMethod } from "fastify";
 import logger from "./logger";
 import fastifyStaticCompressPlugin from "./fastify-static-compress-plugin";
 import path from "path";
+import qs from "qs";
 
 type RouteShorthandOptions = Pick<
 	RouteOptions,
@@ -40,6 +42,7 @@ class Server {
 		this.fastify = fastify({
 			logger: logger,
 			caseSensitive: false,
+			querystringParser: (str) => qs.parse(str), //use incredible qs query string parser
 		});
 	}
 

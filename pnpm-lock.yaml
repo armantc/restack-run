@@ -5,6 +5,7 @@ importers:
   .:
     specifiers:
       '@types/node': ^18.7.11
+      '@types/qs': ^6.9.7
       '@types/rimraf': ^3.0.2
       '@typescript-eslint/eslint-plugin': ^5.34.0
       '@typescript-eslint/parser': ^5.34.0
@@ -16,12 +17,13 @@ importers:
       eslint-plugin-react-hooks: ^4.6.0
       eslint-plugin-tsdoc: ^0.2.16
       eslint-plugin-valtio: ^0.6.0
-      pnpm: ^7.11.0
+      pnpm: ^7.13.1
       tslib: ^2.4.0
       tsup: ^6.2.2
       typescript: ^4.7.4
     devDependencies:
       '@types/node': 18.7.16
+      '@types/qs': 6.9.7
       '@types/rimraf': 3.0.2
       '@typescript-eslint/eslint-plugin': 5.36.2_2l2r3i3lm6jysqd4ac3ql4n2mm
       '@typescript-eslint/parser': 5.36.2_itqs5654cmlnjraw6gjzqacppi
@@ -33,13 +35,16 @@ importers:
       eslint-plugin-react-hooks: 4.6.0_eslint@8.23.0
       eslint-plugin-tsdoc: 0.2.16
       eslint-plugin-valtio: 0.6.0
-      pnpm: 7.11.0
+      pnpm: 7.13.1
       tslib: 2.4.0
       tsup: 6.2.3_typescript@4.8.3
       typescript: 4.8.3
 
   packages/client:
-    specifiers: {}
+    specifiers:
+      qs: ^6.11.0
+    dependencies:
+      qs: 6.11.0
 
   packages/core:
     specifiers:
@@ -123,6 +128,7 @@ importers:
       mime: ^3.0.0
       pino: ^8.5.0
       pino-pretty: ^9.1.0
+      qs: ^6.11.0
     dependencies:
       '@fastify/compress': 6.1.1
       '@fastify/static': 6.5.0
@@ -131,6 +137,7 @@ importers:
       mime: 3.0.0
       pino: 8.5.0
       pino-pretty: 9.1.0
+      qs: 6.11.0
 
   packages/utils:
     specifiers: {}
@@ -3130,6 +3137,10 @@ packages:
 
   /@types/parse-json/4.0.0:
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==}
+
+  /@types/qs/6.9.7:
+    resolution: {integrity: sha512-FGa1F62FT09qcrueBA6qYTrJPVDzah9a+493+o2PCXsesWHIn27G98TsSMs3WPNbZIEj4+VJf6saSFpvD+3Zsw==}
+    dev: true
 
   /@types/resolve/1.17.1:
     resolution: {integrity: sha512-yy7HuzQhj0dhGpD8RLXSZWEkLsV9ibvxvi6EiJ3bkqLAO1RGo0WbkWQiwpRlSFymTJRz0d3k5LM3kkx8ArDbLw==}
@@ -6274,8 +6285,8 @@ packages:
     engines: {node: '>=4'}
     dev: false
 
-  /pnpm/7.11.0:
-    resolution: {integrity: sha512-cxh4TfCE8L4ZbLBN72kTGKTYP7X08nrIzoQ2rQCKihAcIHAdNIgsk4bEJyE1xHjE+bNJt9skwr7aJv3LpvUawQ==}
+  /pnpm/7.13.1:
+    resolution: {integrity: sha512-Nu1LzxlH3qdIFe0DJ5SciqBl9i7t/eW+c0zKf9g8TXRo20EhXy/e9YwCLY2fEwbIYL/3gZ4zuys010PRpsbHFQ==}
     engines: {node: '>=14.6'}
     hasBin: true
     dev: true
@@ -6552,6 +6563,13 @@ packages:
       yargs-parser: 21.1.1
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /qs/6.11.0:
+    resolution: {integrity: sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==}
+    engines: {node: '>=0.6'}
+    dependencies:
+      side-channel: 1.0.4
     dev: false
 
   /queue-microtask/1.2.3:

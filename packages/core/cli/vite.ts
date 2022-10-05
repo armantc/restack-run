@@ -130,7 +130,7 @@ function handleReStackCall(route, push, path, store) {
 
 				const defOpts = types.objectExpression([
 					types.objectProperty(
-						types.identifier("route"),
+						types.identifier("url"),
 						types.stringLiteral(route.url)
 					),
 					types.objectProperty(
