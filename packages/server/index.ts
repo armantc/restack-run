@@ -12,14 +12,9 @@ type RouteShorthandOptions = Pick<
 	RouteOptions,
 	| "schema"
 	| "attachValidation"
-	| "exposeHeadRoute"
 	| "bodyLimit"
-	| "logLevel"
 	| "version"
-> & {
-	url?: string;
-	method?: string;
-};
+>;
 
 function handleArguments(args: any[]): RouteOptions {
 	let options: Partial<RouteOptions> = {};
@@ -58,6 +53,7 @@ class Server {
 	put = this.route;
 	patch = this.route;
 	delete = this.route;
+	options = this.route;
 
 	private async start(port: 8080, apiPrefix, publicPath) {
 
