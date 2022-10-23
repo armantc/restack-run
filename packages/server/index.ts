@@ -7,14 +7,22 @@ import logger from "./logger";
 import fastifyStaticCompressPlugin from "./fastify-static-compress-plugin";
 import path from "path";
 import qs from "qs";
+import type { ClientType } from "@restack-run/client";
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
+
+type RestackSchema = {
+	data: unknown;
+	response: unknown;
+	headers: unknown;
+};
 
 type RouteShorthandOptions = Pick<
 	RouteOptions,
-	| "schema"
-	| "attachValidation"
-	| "bodyLimit"
-	| "version"
->;
+	"attachValidation" | "bodyLimit" | "version"
+> & {
+	schema?: RestackSchema;
+};
 
 function handleArguments(args: any[]): RouteOptions {
 	let options: Partial<RouteOptions> = {};
@@ -25,24 +33,38 @@ function handleArguments(args: any[]): RouteOptions {
 	return options as RouteOptions;
 }
 
-class Server {
+class _Server {
 	private routes: RouteOptions[] = [];
-	
+
 	/**
 	 * Return fastify instance for advanced configuration
 	 */
-	fastify : FastifyInstance;
+	fastify: FastifyInstance;
 
-	constructor(){
+	constructor() {
 		this.fastify = fastify({
 			logger: logger,
 			caseSensitive: false,
 			querystringParser: (str) => qs.parse(str), //use incredible qs query string parser
 		});
+
+		const ajv = new Ajv({
+			allErrors: true,
+			removeAdditional: true,
+			useDefaults: true,
+			strict: isDev(),
+			coerceTypes: true, //this force convert , for example if type is number and pass string convert it to number auto
+		});
+
+		addFormats(ajv);
+
+		this.fastify.setValidatorCompiler(({ schema }) => {
+			return ajv.compile(schema);
+		});
 	}
 
-	private route(options: RouteShorthandOptions, handler: RouteHandlerMethod);
-	private route(handler: RouteHandlerMethod);
+	// private route(options: RouteShorthandOptions, handler: RouteHandlerMethod);
+	// private route(handler: RouteHandlerMethod);
 	private route(...args) {
 		this.routes.push(handleArguments(args));
 	}
@@ -56,9 +78,7 @@ class Server {
 	options = this.route;
 
 	private async start(port: 8080, apiPrefix, publicPath) {
-
-		if(this.routes.length === 0)
-		{
+		if (this.routes.length === 0) {
 			logger.warn("Can't start server, no route defined");
 			return;
 		}
@@ -70,10 +90,38 @@ class Server {
 				spa: true,
 			});
 
-		for(const route of this.routes)
-		{
-			route.url = path.join(apiPrefix,route.url).replaceAll("\\", "/");
-			this.fastify.route(route)
+		this.fastify.addHook("preHandler", (request) => {
+			if (request.body) request["data"] = request.body;
+			else if (request.query) request["data"] = request.query;
+		});
+
+		for (const route of this.routes) {
+			route.url = path.join(apiPrefix, route.url).replaceAll("\\", "/");
+
+			const shOptionsSchema = (route as RouteShorthandOptions).schema;
+
+			if (shOptionsSchema) {
+				const schema = {};
+
+				if (shOptionsSchema.response)
+					schema["response"] = shOptionsSchema.response;
+				if (shOptionsSchema.headers)
+					schema["headers"] = shOptionsSchema.headers;
+
+				if (shOptionsSchema.data) {
+					if (
+						["PUT", "POST", "PATCH"].includes(
+							route.method as string
+						)
+					)
+						schema["body"] = shOptionsSchema.data;
+					else schema["querystring"] = shOptionsSchema.data;
+				}
+
+				route.schema = schema;
+			}
+
+			this.fastify.route(route);
 		}
 
 		logger.info(`${this.routes.length} routes successfully registered`);
@@ -91,7 +139,23 @@ class Server {
 		}
 	}
 }
+interface Route {
+	<TData, TResponse>(
+		options: RouteShorthandOptions,
+		handler: RouteHandlerMethod
+	): ClientType<TResponse>;
+	<TData, TResponse>(handler: RouteHandlerMethod): ClientType<TResponse>;
+}
+interface Server  {
+	get: Route;
+	head: Route;
+	post: Route;
+	put: Route;
+	patch: Route;
+	delete: Route;
+	options: Route;
+}
 
-const server = new Server();
+const server = new _Server();
 
-export default server;
+export default server as unknown as Server;

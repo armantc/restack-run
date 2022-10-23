@@ -18,6 +18,8 @@
 		"build": "pnpm tsup"
 	},
 	"dependencies": {
-		"qs" : "^6.11.0"
+		"ajv": "^8.11.0",
+		"ajv-formats" : "^2.1.1",
+		"qs": "^6.11.0"
 	}
 }

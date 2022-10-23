@@ -44,8 +44,6 @@ export default function (fastify, options, done) {
 	done();
 
 	function middleware(request, reply, done) {
-		//todo must check if access token, verify and extract roles then check for js file split byt dot
-		// first part is role then if not role for that reply 401;
 
 		for (const exDir of options.exclude) {
 			let path = exDir;

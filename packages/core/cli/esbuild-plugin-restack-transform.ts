@@ -287,7 +287,7 @@ function transform({ id, source, routesDirAbsPath }) {
 		"remove-empty",
 		"remove-unreferenced-variables",
 		"remove-unused-expressions",
-		"remove-unused-variables", //todo must handle this but prevent not to remove server codes
+		"remove-unused-variables"
 	];
 
 	const isTS = id.endsWith(".ts") || id.endsWith(".tsx");
@@ -314,7 +314,6 @@ const PluginRestackTransform = (config: UserConfig): esbuild.Plugin => {
 		setup(build) {
 			build.onLoad({ filter: /.*\.(tsx|jsx|ts|js)$/ }, async (args) => {
 				//just transform routes
-				//todo maybe need exclude importers too
 				if (
 					!args.path
 						.replaceAll("\\", "/")

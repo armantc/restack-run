@@ -111,12 +111,15 @@ const replaceRestackServerPlugin = (relativeId: string) => {
 function handleReStackCall(route, push, path, store) {
 	const callee = path.node.callee;
 
-	const calleeName = callee.name || callee.object.name;
+	const calleeName = callee.name || callee.object?.name;
 
 	const restackCalls = store(RESTACK_SERVER_PKG_NAME);
 
 	if (restackCalls) {
-		const method = callee.property.name.toUpperCase();
+		const method = callee.property?.name.toUpperCase();
+
+		if(!method)
+			return;
 
 		for (const sCaller of restackCalls) {
 			if (calleeName === sCaller && HTTP_METHODS.includes(method)) {
@@ -172,8 +175,7 @@ function handleReStackCall(route, push, path, store) {
 						path,
 						replaceWith,
 					});
-			} else {
-				if (method !== "ROUTE")
+			} else if (calleeName === sCaller && method !== "ROUTE") {
 					throw new Error(
 						`Method ${method} not exist or not supported inside route files`
 					);
