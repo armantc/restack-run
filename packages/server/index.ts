@@ -2,27 +2,13 @@
 /* eslint-disable import/no-named-as-default */
 import { isDev } from "@restack-run/utils";
 import fastify, { FastifyInstance } from "fastify";
-import type { RouteOptions, RouteHandlerMethod } from "fastify";
 import logger from "./logger";
 import fastifyStaticCompressPlugin from "./fastify-static-compress-plugin";
 import path from "path";
 import qs from "qs";
-import type { ClientType } from "@restack-run/client";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-
-type RestackSchema = {
-	data: unknown;
-	response: unknown;
-	headers: unknown;
-};
-
-type RouteShorthandOptions = Pick<
-	RouteOptions,
-	"attachValidation" | "bodyLimit" | "version"
-> & {
-	schema?: RestackSchema;
-};
+import type {Server, RouteOptions, RouteShorthandOptions} from "./types";
 
 function handleArguments(args: any[]): RouteOptions {
 	let options: Partial<RouteOptions> = {};
@@ -138,22 +124,6 @@ class _Server {
 			process.exit(1);
 		}
 	}
-}
-interface Route {
-	<TData, TResponse>(
-		options: RouteShorthandOptions,
-		handler: RouteHandlerMethod
-	): ClientType<TResponse>;
-	<TData, TResponse>(handler: RouteHandlerMethod): ClientType<TResponse>;
-}
-interface Server  {
-	get: Route;
-	head: Route;
-	post: Route;
-	put: Route;
-	patch: Route;
-	delete: Route;
-	options: Route;
 }
 
 const server = new _Server();
