@@ -155,6 +155,7 @@ importers:
       '@restack-run/client': workspace:*
       '@restack-run/core': workspace:*
       '@restack-run/server': workspace:*
+      '@sinclair/typebox': ^0.25.2
       '@vitejs/plugin-legacy': ^2.0.0
       '@vitejs/plugin-react': ^2.0.0
       react: ^18.2.0
@@ -173,6 +174,7 @@ importers:
     dependencies:
       '@restack-run/client': link:../../packages/client
       '@restack-run/server': link:../../packages/server
+      '@sinclair/typebox': 0.25.2
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     devDependencies:
@@ -182,7 +184,7 @@ importers:
       terser: 5.15.0
       vite: 3.1.0_terser@5.15.0
       vite-plugin-compression: 0.5.1_vite@3.1.0
-      vite-plugin-pwa: 0.12.7_vite@3.1.0
+      vite-plugin-pwa: 0.12.7_zp7t6aa2r77waajuyr5zt63phe
       vite-plugin-svgr: 2.2.1_vite@3.1.0
       workbox-core: 6.5.4
       workbox-expiration: 6.5.4
@@ -2952,6 +2954,10 @@ packages:
     dependencies:
       estree-walker: 2.0.2
       picomatch: 2.3.1
+
+  /@sinclair/typebox/0.25.2:
+    resolution: {integrity: sha512-QWjo2shO8oUWM6rSwIz7tUY8+WxP0fhUYQvaFA5eq+sECaQjQaRZIBXgWhWzzsB+lbgjljB1zRFfyX8mudn1gQ==}
+    dev: false
 
   /@surma/rollup-plugin-off-main-thread/2.2.3:
     resolution: {integrity: sha512-lR8q/9W7hZpMWweNiAKU7NQerBnzQQLvi8qnTDU/fxItPhtZVMbPV3lbCwjhIlNBe9Bbr5V+KHshvWmVSG9cxQ==}
@@ -7901,6 +7907,25 @@ packages:
     transitivePeerDependencies:
       - '@types/babel__core'
       - supports-color
+    dev: false
+
+  /vite-plugin-pwa/0.12.7_zp7t6aa2r77waajuyr5zt63phe:
+    resolution: {integrity: sha512-salSwS1wWc1niNWfhX2W6gtfXmk+XESMz62w95EHLq6fSM2bDgDm1APmvq1nkDcxH6Onky7HxysCBKMzvOHXYg==}
+    peerDependencies:
+      vite: ^2.0.0 || ^3.0.0-0
+      workbox-window: ^6.4.0
+    dependencies:
+      debug: 4.3.4
+      fast-glob: 3.2.12
+      pretty-bytes: 6.0.0
+      rollup: 2.79.0
+      vite: 3.1.0_terser@5.15.0
+      workbox-build: 6.5.4
+      workbox-window: 6.5.4
+    transitivePeerDependencies:
+      - '@types/babel__core'
+      - supports-color
+    dev: true
 
   /vite-plugin-svgr/2.2.1_vite@3.1.0:
     resolution: {integrity: sha512-+EqwahbwjETJH/ssA/66dNYyKN1cO0AStq96MuXmq5maU7AePBMf2lDKfQna49tJZAjtRz+R899BWCsUUP45Fg==}

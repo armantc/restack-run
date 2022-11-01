@@ -9,6 +9,7 @@ type RouteOptions = {
 	method: string;
 	params: string[];
 	schema?: any;
+	apiPrefix : string;
 };
 
 type FetchRequestInit = Omit<RequestInit, "body" | "method">;
@@ -22,6 +23,11 @@ const config = {
 	fetch: fetch,
 };
 
+function pathJoin(parts, sep = "/") {
+	const replace = new RegExp(sep + "{1,}", "g");
+	return parts.join(sep).replace(replace, sep);
+}
+
 class Fetcher<TResponse> {
 	private requestInit: RequestInit = {
 		headers: {
@@ -34,13 +40,12 @@ class Fetcher<TResponse> {
 		fetchOptions: FetchOptions = {},
 		validators: object
 	) {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		this.then = async (resolve, reject) => {
+		this.then = async function() {
 			try {
 				this.requestInit.method = routeOptions.method;
 
 				let url = routeOptions.url;
+
 
 				if (routeOptions.params.length > 0) {
 					url += "/";
@@ -64,6 +69,8 @@ class Fetcher<TResponse> {
 
 					url = url.slice(0, -1); //remove last slash added before
 				}
+
+				url = pathJoin([routeOptions.apiPrefix, url]);
 
 				//todo must add validators
 
@@ -94,11 +101,10 @@ class Fetcher<TResponse> {
 					this.requestInit
 				);
 
-				//@ts-ignore
-				void resolve(result);
+				return await result.json();
 			} catch (e) {
-				//@ts-ignore
-				void reject(e);
+				if(e) //must with error handling
+					throw e;
 			}
 		};
 	}
@@ -131,14 +137,13 @@ class Client<TResponse> {
 			useDefaults: true,
 			//strict: isDev(),
 			$data: true,
-
-			//coerceTypes: false //enable this cause issue when querying mongodb with wrong type,
+			coerceTypes: true //enable this cause issue when querying mongodb with wrong type,
 		});
 
 		addFormats(ajv);
 
 		if (routeOptions.schema) {
-			for (const key of routeOptions.schema) {
+			for (const key in routeOptions.schema) {
 				this.validators[key + "Validator"] = ajv.compile(
 					routeOptions.schema[key]
 				);

@@ -63,7 +63,8 @@ const viteReStackPlugin = (config: RestackConfig): PluginOption => {
 						[
 							"replace-restack-server-plugin",
 							replaceRestackServerPlugin(
-								id.substring(routesAbsPath.length)
+								id.substring(routesAbsPath.length),
+								config.apiPrefix
 							),
 						],
 						"remove-unused-variables",
@@ -83,7 +84,7 @@ const viteReStackPlugin = (config: RestackConfig): PluginOption => {
 	};
 };
 
-const replaceRestackServerPlugin = (relativeId: string) => {
+const replaceRestackServerPlugin = (relativeId: string,apiPrefix : string) => {
 	const route = convertToRoute(relativeId);
 
 	return {
@@ -102,13 +103,13 @@ const replaceRestackServerPlugin = (relativeId: string) => {
 			},
 
 			CallExpression(path) {
-				handleReStackCall(route, push, path, store);
+				handleReStackCall(apiPrefix,route, push, path, store);
 			},
 		}),
 	};
 };
 
-function handleReStackCall(route, push, path, store) {
+function handleReStackCall(apiPrefix,route, push, path, store) {
 	const callee = path.node.callee;
 
 	const calleeName = callee.name || callee.object?.name;
@@ -144,6 +145,10 @@ function handleReStackCall(route, push, path, store) {
 						types.identifier("method"),
 						types.stringLiteral(method)
 					),
+					types.objectProperty(
+						types.identifier("apiPrefix"),
+						types.stringLiteral(apiPrefix)
+					)
 				]);
 
 				const replaceMember = types.memberExpression(

@@ -9,6 +9,7 @@ import qs from "qs";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import type {Server, RouteOptions, RouteShorthandOptions} from "./types";
+import ErrorHandler from "./error-handler";
 
 function handleArguments(args: any[]): RouteOptions {
 	let options: Partial<RouteOptions> = {};
@@ -35,10 +36,10 @@ class _Server {
 		});
 
 		const ajv = new Ajv({
-			allErrors: true,
+			allErrors: false,
 			removeAdditional: true,
 			useDefaults: true,
-			strict: isDev(),
+			//strict: isDev(),
 			coerceTypes: true, //this force convert , for example if type is number and pass string convert it to number auto
 		});
 
@@ -47,10 +48,10 @@ class _Server {
 		this.fastify.setValidatorCompiler(({ schema }) => {
 			return ajv.compile(schema);
 		});
+
+		this.fastify.setErrorHandler(ErrorHandler);
 	}
 
-	// private route(options: RouteShorthandOptions, handler: RouteHandlerMethod);
-	// private route(handler: RouteHandlerMethod);
 	private route(...args) {
 		this.routes.push(handleArguments(args));
 	}
@@ -75,11 +76,6 @@ class _Server {
 				exclude: [apiPrefix], //routes that not contains static like api path must put
 				spa: true,
 			});
-
-		this.fastify.addHook("preHandler", (request) => {
-			if (request.body) request["data"] = request.body;
-			else if (request.query) request["data"] = request.query;
-		});
 
 		for (const route of this.routes) {
 			route.url = path.join(apiPrefix, route.url).replaceAll("\\", "/");
@@ -109,6 +105,11 @@ class _Server {
 
 			this.fastify.route(route);
 		}
+
+		this.fastify.addHook("preHandler", (request,reply) => {
+			if (request.body) request["data"] = request.body;
+			else if (request.query) request["data"] = request.query;
+		});
 
 		logger.info(`${this.routes.length} routes successfully registered`);
 

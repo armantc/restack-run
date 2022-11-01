@@ -5,11 +5,12 @@
 		"dev": "restack",
 		"build": "restack build",
 		"preview": "restack preview",
-		"buildIndependent" : "restack build --independent"
+		"buildIndependent": "restack build --independent"
 	},
 	"dependencies": {
-		"@restack-run/server": "workspace:*",
 		"@restack-run/client": "workspace:*",
+		"@restack-run/server": "workspace:*",
+		"@sinclair/typebox": "^0.25.2",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
 	},
