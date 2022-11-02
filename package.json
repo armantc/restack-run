@@ -1,6 +1,6 @@
 {
 	"name": "restack-run",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"repository": "git@github.com:armantc/restack-run.git",
 	"author": "Arman Kabir <nkabir.1986@gmail.com>",
 	"license": "MIT",
