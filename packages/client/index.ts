@@ -9,14 +9,33 @@ type RouteOptions = {
 	method: string;
 	params: string[];
 	schema?: any;
-	apiPrefix : string;
+	apiPrefix: string;
 };
 
 type FetchRequestInit = Omit<RequestInit, "body" | "method">;
 
-type FetchOptions = {
-	data?: object;
-	params?: object;
+type RequestDataDefault = unknown;
+type RequestParamsDefault = unknown;
+type RequestHeadersDefault = unknown;
+
+interface RequestGenericInterface {
+	Data?: RequestDataDefault;
+	Params?: RequestParamsDefault;
+	Headers?: RequestHeadersDefault;
+}
+
+type ReplyDefault = unknown;
+interface ReplyGenericInterface {
+	Reply?: ReplyDefault;
+}
+
+interface RouteGenericInterface
+	extends RequestGenericInterface,
+		ReplyGenericInterface {}
+
+type FetchOptions<T extends RouteGenericInterface> = {
+	data?: T["Data"];
+	params?: T["Params"];
 };
 
 const config = {
@@ -28,7 +47,9 @@ function pathJoin(parts, sep = "/") {
 	return parts.join(sep).replace(replace, sep);
 }
 
-class Fetcher<TResponse> {
+class Fetcher<T extends RouteGenericInterface> {
+	fetch = config.fetch;
+
 	private requestInit: RequestInit = {
 		headers: {
 			"Content-Type": "application/json",
@@ -37,79 +58,90 @@ class Fetcher<TResponse> {
 
 	constructor(
 		routeOptions: RouteOptions,
-		fetchOptions: FetchOptions = {},
+		fetchOptions: FetchOptions<T> = {},
 		validators: object
 	) {
-		this.then = async function() {
-			try {
-				this.requestInit.method = routeOptions.method;
+		//@ts-ignore
+		this.then = async function (resolve: Function) {
+			if (fetchOptions.data) {
+				const isValidData = validators["data"](fetchOptions.data);
 
-				let url = routeOptions.url;
+				if (!isValidData) {
+					const errors = validators["data"].errors;
+					throw {
+						message: "Validation Error",
+						errors,
+					};
+				}
+			}
 
+			this.requestInit.method = routeOptions.method;
 
-				if (routeOptions.params.length > 0) {
-					url += "/";
+			let url = routeOptions.url;
 
-					if (!fetchOptions.params)
+			if (routeOptions.params.length > 0) {
+				url += "/";
+
+				if (!fetchOptions.params)
+					throw new Error(
+						`Fetching need supply params : ${routeOptions.params.join(
+							","
+						)}`
+					);
+
+				for (const param of routeOptions.params) {
+					if (!fetchOptions.params[param]) {
 						throw new Error(
-							`Fetching need supply params : ${routeOptions.params.join(
-								","
-							)}`
+							`Fetching need supply param : ${param}`
 						);
-
-					for (const param of routeOptions.params) {
-						if (!fetchOptions.params[param]) {
-							throw new Error(
-								`Fetching need supply param : ${param}`
-							);
-						}
-
-						url.replace(`/:${param}/`, fetchOptions.params[param]);
 					}
 
-					url = url.slice(0, -1); //remove last slash added before
+					url.replace(`/:${param}/`, fetchOptions.params[param]);
 				}
 
-				url = pathJoin([routeOptions.apiPrefix, url]);
+				url = url.slice(0, -1); //remove last slash added before
+			}
 
-				//todo must add validators
+			url = pathJoin([routeOptions.apiPrefix, url]);
 
-				if (
-					fetchOptions.data &&
-					typeof fetchOptions.data === "object"
-				) {
+			if (fetchOptions.data && typeof fetchOptions.data === "object") {
+				if (["POST", "PUT", "PATCH"].includes(routeOptions.method)) {
 					if (
-						["POST", "PUT", "PATCH"].includes(routeOptions.method)
+						this.requestInit.headers?.["Content-Type"] ===
+						"application/json"
 					) {
-						if (
-							this.requestInit.headers?.["Content-Type"] ===
-							"application/json"
-						) {
-							this.requestInit.body = JSON.stringify(
-								fetchOptions.data
-							);
-						}
-					} else {
-						//better to node use body in method like GET so we convert data to query string
-						url += "?" + qs.stringify(fetchOptions.data);
+						this.requestInit.body = JSON.stringify(
+							fetchOptions.data
+						);
 					}
+				} else {
+					//better to node use body in method like GET so we convert data to query string
+					url += "?" + qs.stringify(fetchOptions.data);
 				}
+			}
 
-				const result = await config.fetch.call(
-					window,
-					url,
-					this.requestInit
-				);
+			const response = await this.fetch.call(
+				window,
+				url,
+				this.requestInit
+			);
 
-				return await result.json();
-			} catch (e) {
-				if(e) //must with error handling
-					throw e;
+			const contentType =
+				response.headers.get("content-type")?.toLowerCase() ||
+				"application/json";
+
+			if (contentType.indexOf("application/json") >= 0) {
+				resolve(await response.json());
+			} else if (contentType.indexOf("text/") >= 0) {
+				resolve(await response.text());
+			} else {
+				throw new Error(
+					"Restack default fetch just support json and text response, please provide custom fetch method.")
 			}
 		};
 	}
 
-	withOptions(requestInit: FetchRequestInit): Omit<this, "withOptions"> {
+	withOptions(requestInit: FetchRequestInit): this {
 		this.requestInit = { ...this.requestInit, ...requestInit };
 
 		delete this.requestInit["body"];
@@ -118,13 +150,18 @@ class Fetcher<TResponse> {
 		return this;
 	}
 
-	// async then(response:TResponse) : Promise<TResponse> {
-	// 	return "" as unknown as TResponse
-	// }
+	withFetch(
+		fetchMethod: (
+			input: RequestInfo | URL,
+			init?: RequestInit | undefined
+		) => Promise<Response>
+	) {
+		this.fetch = fetchMethod;
+	}
 
-	then: Promise<TResponse>["then"];
+	then: Promise<T["Reply"]>["then"];
 }
-class Client<TResponse> {
+class Client<T extends RouteGenericInterface> {
 	private routeOptions: RouteOptions;
 	private validators = {};
 
@@ -137,26 +174,20 @@ class Client<TResponse> {
 			useDefaults: true,
 			//strict: isDev(),
 			$data: true,
-			coerceTypes: true //enable this cause issue when querying mongodb with wrong type,
+			coerceTypes: true, //enable this cause issue when querying mongodb with wrong type,
 		});
 
 		addFormats(ajv);
 
 		if (routeOptions.schema) {
 			for (const key in routeOptions.schema) {
-				this.validators[key + "Validator"] = ajv.compile(
-					routeOptions.schema[key]
-				);
+				this.validators[key] = ajv.compile(routeOptions.schema[key]);
 			}
 		}
 	}
 
-	fetch(options?: FetchOptions) {
-		return new Fetcher<TResponse>(
-			this.routeOptions,
-			options,
-			this.validators
-		);
+	fetch(options?: FetchOptions<T>) {
+		return new Fetcher<T>(this.routeOptions, options, this.validators);
 	}
 }
 
@@ -166,7 +197,6 @@ function route(routeOptions: RouteOptions) {
 
 export default { route };
 
-type ClientType<T> = Client<T>;
+type ClientType<T extends RouteGenericInterface> = Client<T>;
 
-//export type ClientType = InstanceType<typeof Client>;
 export type { ClientType };

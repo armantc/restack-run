@@ -1,28 +1,36 @@
-import server from "@restack-run/server";
+import server,{ValidationError} from "@restack-run/server";
 import {max} from "@/test";
 import path from "path";
 import {useEffect} from "react";
+import { Static, Type } from "@sinclair/typebox";
 
-function test(param: any) {
-	return "ali";
-}
+const UserSchema = Type.Object({
+	name : Type.String(),
+	address : Type.Optional(Type.String())
+});
 
-export const definition = server.get({
-},async () => {
+type User = Static<typeof UserSchema>;
 
-	return {name :"ali 2"};
+export const getUsers = server.get<{Data : User}>({
+	schema : {
+		data : UserSchema
+	}
+},async function(request,reply)  {
+	return request.data;
 });
 
 export default function Dashboard() {
 
 	useEffect(()=>{
-		definition.fetch().then((val)=>{
-			console.log(val);
-		})
+		void getUsers.fetch({
+			data : {
+				name: "ali"
+			}
+		}).then((val)=>{
+			//
+			console.log("hereee",val);
+		}).catch((reason)=> console.log("Errrror",reason));
 	},[]);
 
 	return <div>Hello from dashboard.</div>;
 }
-
-const x = 10;
-const y = 12;
