@@ -9,7 +9,7 @@ import qs from "qs";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import type {Server, RouteOptions, RouteShorthandOptions} from "./types";
-import ErrorHandler from "./error-handler";
+import ErrorHandler,{ValidationError} from "./error-handler";
 
 function handleArguments(args: any[]): RouteOptions {
 	let options: Partial<RouteOptions> = {};
@@ -106,9 +106,10 @@ class _Server {
 			this.fastify.route(route);
 		}
 
-		this.fastify.addHook("preHandler", (request,reply) => {
+		this.fastify.addHook("preHandler", (request, reply, done) => {
 			if (request.body) request["data"] = request.body;
 			else if (request.query) request["data"] = request.query;
+			done();
 		});
 
 		logger.info(`${this.routes.length} routes successfully registered`);
@@ -128,5 +129,7 @@ class _Server {
 }
 
 const server = new _Server();
+
+export {ValidationError};
 
 export default server as unknown as Server;

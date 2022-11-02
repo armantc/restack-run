@@ -255,10 +255,10 @@ interface Route {
 	<T extends RouteGenericInterface>(
 		options: RouteShorthandOptions,
 		handler: RouteShorthandHandlerMethod<T>
-	): ClientType<T["Reply"]>;
+	): ClientType<T>;
 	<T extends RouteGenericInterface>(
 		handler: RouteShorthandHandlerMethod<T>
-	): ClientType<T["Reply"]>;
+	): ClientType<T>;
 }
 export interface Server {
 	get: Route;
