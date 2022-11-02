@@ -64,7 +64,7 @@ class _Server {
 	delete = this.route;
 	options = this.route;
 
-	private async start(port: 8080, apiPrefix, publicPath) {
+	private async start(port: 8080, apiPrefix : "string", publicPath : "string") {
 		if (this.routes.length === 0) {
 			logger.warn("Can't start server, no route defined");
 			return;
@@ -115,7 +115,7 @@ class _Server {
 		logger.info(`${this.routes.length} routes successfully registered`);
 
 		try {
-			const host = isDev() ? "localhost" : "0.0.0.0";
+			const host = process.env["LISTEN_ADDRESS"] || "localhost";
 
 			await this.fastify.listen({
 				port,
