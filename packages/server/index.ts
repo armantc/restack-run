@@ -126,6 +126,10 @@ class _Server {
 			process.exit(1);
 		}
 	}
+
+	get FastifyInstance(){
+			return this.fastify;
+	}
 }
 
 const server = new _Server();
