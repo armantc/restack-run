@@ -38,8 +38,29 @@ type FetchOptions<T extends RouteGenericInterface> = {
 	params?: T["Params"];
 };
 
+type FetchMethod = (
+	input: RequestInfo | URL,
+	init?: RequestInit | undefined
+) => Promise<Response>;
+
 const config = {
-	fetch: fetch,
+	fetch: async (input : RequestInfo, init? : RequestInit) => {
+		const response = await fetch.call(window, input, init);
+
+		const contentType =
+			response.headers.get("content-type")?.toLowerCase() ||
+			"application/json";
+
+		if (contentType.indexOf("application/json") >= 0) {
+			return await response.json();
+		} else if (contentType.indexOf("text/") >= 0) {
+			return await response.text();
+		} else {
+			throw new Error(
+				"Restack default fetch just support json and text response, please provide custom fetch method."
+			);
+		}
+	},
 };
 
 function pathJoin(parts, sep = "/") {
@@ -126,18 +147,7 @@ class Fetcher<T extends RouteGenericInterface> {
 				this.requestInit
 			);
 
-			const contentType =
-				response.headers.get("content-type")?.toLowerCase() ||
-				"application/json";
-
-			if (contentType.indexOf("application/json") >= 0) {
-				resolve(await response.json());
-			} else if (contentType.indexOf("text/") >= 0) {
-				resolve(await response.text());
-			} else {
-				throw new Error(
-					"Restack default fetch just support json and text response, please provide custom fetch method.")
-			}
+			resolve(response);
 		};
 	}
 
@@ -151,10 +161,7 @@ class Fetcher<T extends RouteGenericInterface> {
 	}
 
 	withFetch(
-		fetchMethod: (
-			input: RequestInfo | URL,
-			init?: RequestInit | undefined
-		) => Promise<Response>
+		fetchMethod: FetchMethod
 	) {
 		this.fetch = fetchMethod;
 	}
@@ -191,11 +198,17 @@ class Client<T extends RouteGenericInterface> {
 	}
 }
 
+class ClientConfig {
+	static setFetch(fetchMethod : FetchMethod){
+		config.fetch = fetchMethod;
+	}
+}
+
 function route(routeOptions: RouteOptions) {
 	return new Client(routeOptions);
 }
 
-export default { route };
+export default { route , ClientConfig };
 
 type ClientType<T extends RouteGenericInterface> = Client<T>;
 
