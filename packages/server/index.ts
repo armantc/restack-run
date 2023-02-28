@@ -66,8 +66,8 @@ class _Server {
 
 	private async start(port: 8080, apiPrefix : "string", publicPath : "string") {
 		if (this.routes.length === 0) {
-			logger.warn("Can't start server, no route defined");
-			return;
+			logger.warn("Please provide some routes");
+			// return;
 		}
 
 		if (!isDev())
