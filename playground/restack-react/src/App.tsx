@@ -17,7 +17,13 @@ const x =10;
 const y = 12;
 
 export default function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
+
+//   useEffect(()=>{
+// 	setTimeout(() => {
+// 		throw new Error("error");
+// 	}, 500);
+//   })
 
   return (
 		<div className="App">

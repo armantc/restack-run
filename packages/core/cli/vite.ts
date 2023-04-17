@@ -76,7 +76,7 @@ const viteReStackPlugin = (config: RestackConfig): PluginOption => {
 				//const _convert = convert.fromSource(out.code);
 
 				return {
-					code: out.code,
+					code: convert.removeComments(out.code), //remove putout sourcemap from code
 					//map: _convert.sourcemap,
 				};
 			}
