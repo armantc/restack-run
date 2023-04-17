@@ -73,11 +73,11 @@ const viteReStackPlugin = (config: RestackConfig): PluginOption => {
 					],
 				});
 
-				const _convert = convert.fromSource(out.code);
+				//const _convert = convert.fromSource(out.code);
 
 				return {
-					code: convert.removeComments(out.code),
-					map: _convert.sourcemap,
+					code: out.code,
+					//map: _convert.sourcemap,
 				};
 			}
 		},
