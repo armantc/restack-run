@@ -2,9 +2,8 @@
 import { UserConfig } from "./types";
 import { createServer, build, PluginOption } from "vite";
 import merge from "lodash/merge.js";
-import putout, { operator } from "putout";
+import putout, { operator } from "./putout";
 import path from "path";
-import convert from "convert-source-map";
 import type { RestackConfig } from "./types";
 import types from "@babel/types";
 import { convertToRoute } from "./restack";
@@ -56,7 +55,7 @@ const viteReStackPlugin = (config: RestackConfig): PluginOption => {
 					fix: true,
 					isJSX: true,
 					isTS: id.endsWith(".tsx"),
-					sourceFileName: path.basename(id),
+					sourceFileName: id,
 					sourceMapName: path.parse(id).name,
 					plugins: [
 						"typescript",
@@ -73,11 +72,9 @@ const viteReStackPlugin = (config: RestackConfig): PluginOption => {
 					],
 				});
 
-				//const _convert = convert.fromSource(out.code);
-
 				return {
-					code: convert.removeComments(out.code), //remove putout sourcemap from code
-					//map: _convert.sourcemap,
+					code : out.code,
+					map : out.map
 				};
 			}
 		},

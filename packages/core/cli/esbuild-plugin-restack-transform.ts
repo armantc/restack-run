@@ -1,7 +1,7 @@
 /* eslint-disable import/no-named-as-default-member */
 import { UserConfig } from "./types";
 import esbuild from "esbuild";
-import putout, { types, operator } from "putout";
+import putout, { types, operator } from "./putout";
 import path from "path";
 import { nanoid } from "nanoid";
 import fs from "fs-extra";
@@ -45,8 +45,8 @@ const restackTransform = (url: string) => {
 
 					if (!defaultExport)
 						path.node.body.push(
-							types.ExportDefaultDeclaration(
-								types.ObjectExpression([])
+							types.exportDefaultDeclaration(
+								types.objectExpression([])
 							)
 						);
 				},
@@ -73,9 +73,9 @@ function generateDefaultExport(listStore) {
 		for (const { name, isRoute } of listStore()) {
 			if (isRoute) {
 				properties.push(
-					types.ObjectProperty(
-						types.Identifier(name),
-						types.Identifier(name),
+					types.objectProperty(
+						types.identifier(name),
+						types.identifier(name),
 						false,
 						true //create shorthand
 					) as never
@@ -85,8 +85,8 @@ function generateDefaultExport(listStore) {
 	}
 
 	if (properties.length > 0) {
-		return types.ExportDefaultDeclaration(
-			types.ObjectExpression(properties)
+		return types.exportDefaultDeclaration(
+			types.objectExpression(properties)
 		);
 	}
 
@@ -122,7 +122,7 @@ function handleExport(push, path, listStore) {
 				push({
 					path: path,
 					replaceWithMultiple: [
-						types.ExportNamedDeclaration(path.node.declaration),
+						types.exportNamedDeclaration(path.node.declaration),
 						generateDefaultExport(listStore),
 					],
 				});
@@ -130,10 +130,10 @@ function handleExport(push, path, listStore) {
 				push({
 					path: path,
 					replaceWithMultiple: [
-						types.ExportNamedDeclaration(
-							types.VariableDeclaration("const", [
-								types.VariableDeclarator(
-									types.Identifier(`restack${nanoid(3)}`),
+						types.exportNamedDeclaration(
+							types.variableDeclaration("const", [
+								types.variableDeclarator(
+									types.identifier(`restack${nanoid(3)}`),
 									path.node.declaration
 								),
 							])
@@ -296,9 +296,9 @@ function transform({ id, source, routesDirAbsPath }) {
 		fix: true,
 		isJSX: id.endsWith(".tsx") || id.endsWith(".jsx"),
 		isTS,
-		sourceFileName: path.basename(id),
+		sourceFileName: id,
 		sourceMapName: path.parse(id).name,
-		plugins,
+		plugins
 	});
 
 	return out.code;
