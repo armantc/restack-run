@@ -55,6 +55,7 @@ export default async function restack(config: UserConfig) {
 		const esbuildOpts: esbuild.BuildOptions = {
 			entryPoints: [generateEntryOutPath(cacheDir)], //must compare with destination and remove not existing entries
 			treeShaking: true, //remove dead code
+			external : config.restack.external,
 			platform: "node",
 			bundle: true,
 			format: config.independent ? "cjs" : "esm",

@@ -69,6 +69,7 @@ const defaultConfig: UserConfigExport = {
 		}
 	},
 	restack: {
+		external : [],
 		apiPrefix: "/api",
 		routesDir: "src/routes",
 		outFile: "index.js",

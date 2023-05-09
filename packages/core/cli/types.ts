@@ -23,6 +23,10 @@ export type RestackConfig = {
      * port server listening on
      */
     port? : number;
+    /**
+     * module names marked as external, see esbuild documents
+     */
+    external? : [];
 };
 
 export type UserConfig = {
