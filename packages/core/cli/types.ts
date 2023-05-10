@@ -27,10 +27,6 @@ export type RestackConfig = {
      * module names marked as external, see esbuild documents
      */
     external? : [];
-    /**
-     * enable or disable auto validation on client
-     */
-    validation : boolean;
 };
 
 export type UserConfig = {

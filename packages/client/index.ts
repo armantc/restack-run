@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable import/no-named-as-default-member */
 import qs from "qs";
-import Ajv from "ajv";
-import addFormats from "ajv-formats";
 
 type RouteOptions = {
 	url: string;
@@ -10,7 +8,6 @@ type RouteOptions = {
 	params: string[];
 	schema?: any;
 	apiPrefix: string;
-	validation : boolean;
 };
 
 type FetchRequestInit = Omit<RequestInit, "body" | "method">;
@@ -69,14 +66,6 @@ function pathJoin(parts, sep = "/") {
 	return parts.join(sep).replace(replace, sep);
 }
 
-class ValidationError extends Error {
-	constructor(errors : any[]){
-		super("ValidationError");
-		this.name = this.message;
-		this["errors"] = errors;
-	}
-}
-
 class Fetcher<T extends RouteGenericInterface> {
 	fetch = config.fetch;
 
@@ -88,27 +77,10 @@ class Fetcher<T extends RouteGenericInterface> {
 
 	constructor(
 		routeOptions: RouteOptions,
-		fetchOptions: FetchOptions<T> = {},
-		validators: object
+		fetchOptions: FetchOptions<T> = {}
 	) {
 		//@ts-ignore
 		this.then = async function (resolve: Function, reject: Function) {
-			if (fetchOptions.data && routeOptions.validation) {
-				const isValidData = validators["data"](fetchOptions.data);
-
-				if (!isValidData) {
-					const errors = validators["data"].errors;
-
-					const error = new ValidationError(errors);
-
-					if(reject){
-						return reject(error); //throw error when use async away
-					}else{
-						throw error; //throw error when use then catch
-					}
-				}
-			}
-
 			this.requestInit.method = routeOptions.method;
 
 			let url = routeOptions.url;
@@ -163,7 +135,7 @@ class Fetcher<T extends RouteGenericInterface> {
 
 				resolve(response);
 			} catch (e) {
-				if (reject) return reject(e);
+				if (reject) return reject(e); //throw error when use async await
 				else throw e; //throw error when use then catch
 			}
 		};
@@ -188,31 +160,13 @@ class Fetcher<T extends RouteGenericInterface> {
 }
 class Client<T extends RouteGenericInterface> {
 	private routeOptions: RouteOptions;
-	private validators = {};
 
 	constructor(routeOptions: RouteOptions) {
 		this.routeOptions = routeOptions;
-
-		const ajv = new Ajv({
-			allErrors: true,
-			//removeAdditional: true,
-			useDefaults: true,
-			//strict: isDev(),
-			$data: true,
-			coerceTypes: true, //enable this cause issue when querying mongodb with wrong type,
-		});
-
-		addFormats(ajv);
-
-		if (routeOptions.schema) {
-			for (const key in routeOptions.schema) {
-				this.validators[key] = ajv.compile(routeOptions.schema[key]);
-			}
-		}
 	}
 
 	fetch(options?: FetchOptions<T>) {
-		return new Fetcher<T>(this.routeOptions, options, this.validators);
+		return new Fetcher<T>(this.routeOptions, options);
 	}
 }
 
