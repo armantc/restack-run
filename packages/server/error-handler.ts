@@ -79,7 +79,7 @@ export default function ErrorHandler(
 ) {
 	if (error.validation) {
 		void reply.status(400).send({
-			message: "Validation Error",
+			message: "ValidationError",
 			errors: error.validation,
 		});
 		return;

@@ -10,6 +10,7 @@ type RouteOptions = {
 	params: string[];
 	schema?: any;
 	apiPrefix: string;
+	validation : boolean;
 };
 
 type FetchRequestInit = Omit<RequestInit, "body" | "method">;
@@ -44,7 +45,7 @@ type FetchMethod = (
 ) => Promise<Response>;
 
 const config = {
-	fetch: async (input : RequestInfo, init? : RequestInit) => {
+	fetch: async (input: RequestInfo, init?: RequestInit) => {
 		const response = await fetch.call(window, input, init);
 
 		const contentType =
@@ -68,6 +69,14 @@ function pathJoin(parts, sep = "/") {
 	return parts.join(sep).replace(replace, sep);
 }
 
+class ValidationError extends Error {
+	constructor(errors : any[]){
+		super("ValidationError");
+		this.name = this.message;
+		this["errors"] = errors;
+	}
+}
+
 class Fetcher<T extends RouteGenericInterface> {
 	fetch = config.fetch;
 
@@ -83,16 +92,20 @@ class Fetcher<T extends RouteGenericInterface> {
 		validators: object
 	) {
 		//@ts-ignore
-		this.then = async function (resolve: Function) {
-			if (fetchOptions.data) {
+		this.then = async function (resolve: Function, reject: Function) {
+			if (fetchOptions.data && routeOptions.validation) {
 				const isValidData = validators["data"](fetchOptions.data);
 
 				if (!isValidData) {
 					const errors = validators["data"].errors;
-					throw {
-						message: "Validation Error",
-						errors,
-					};
+
+					const error = new ValidationError(errors);
+
+					if(reject){
+						return reject(error); //throw error when use async away
+					}else{
+						throw error; //throw error when use then catch
+					}
 				}
 			}
 
@@ -141,13 +154,18 @@ class Fetcher<T extends RouteGenericInterface> {
 				}
 			}
 
-			const response = await this.fetch.call(
-				window,
-				url,
-				this.requestInit
-			);
+			try {
+				const response = await this.fetch.call(
+					window,
+					url,
+					this.requestInit
+				);
 
-			resolve(response);
+				resolve(response);
+			} catch (e) {
+				if (reject) return reject(e);
+				else throw e; //throw error when use then catch
+			}
 		};
 	}
 
@@ -160,10 +178,10 @@ class Fetcher<T extends RouteGenericInterface> {
 		return this;
 	}
 
-	withFetch(
-		fetchMethod: FetchMethod
-	) {
+	withFetch(fetchMethod: FetchMethod) {
 		this.fetch = fetchMethod;
+
+		return this;
 	}
 
 	then: Promise<T["Reply"]>["then"];
@@ -199,7 +217,7 @@ class Client<T extends RouteGenericInterface> {
 }
 
 class ClientConfig {
-	static setFetch(fetchMethod : FetchMethod){
+	static setFetch(fetchMethod: FetchMethod) {
 		config.fetch = fetchMethod;
 	}
 }
@@ -208,7 +226,7 @@ function route(routeOptions: RouteOptions) {
 	return new Client(routeOptions);
 }
 
-export default { route , ClientConfig };
+export default { route, ClientConfig };
 
 type ClientType<T extends RouteGenericInterface> = Client<T>;
 
