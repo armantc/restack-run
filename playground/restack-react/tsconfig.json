@@ -10,13 +10,13 @@
         "isolatedModules": true,
         "paths": {
             "@/*": [
-                "./src/*"
+                "./app/*"
             ],
             "@assets/*": [
-                "./src/assets/*"
+                "./app/assets/*"
             ],
             "@routes/*": [
-                "./src/routes/*"
+                "./app/routes/*"
             ]
         }
     },

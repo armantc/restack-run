@@ -16,6 +16,7 @@ export const getUsers = server.get<{Data : User}>({
 		data : UserSchema
 	}
 },async function(request,reply)  {
+	console.log("Code Run From Server");
 	return request.data;
 });
 
@@ -25,7 +26,7 @@ export default function Dashboard() {
 		try {
 		const result = await getUsers.fetch({
 			data : {
-				name : "ali"
+				name : "al"
 			}
 		});
 		console.log(result);

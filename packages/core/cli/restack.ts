@@ -227,7 +227,7 @@ function generateServerEntry(config: UserConfig, cacheDir : string) {
 }
 
 function generateEntryOutPath(cacheDir){
-	return path.join(cacheDir, "server.entry.js");
+	return path.join(cacheDir, "entry.server.js");
 }
 
 function generateDefaultImportName(entry: string, routesDir: string) {

@@ -10,8 +10,10 @@ import fs from "fs-extra";
 const tsConfigPath = "restack.config.ts";
 const jsConfigPath = "restack.config.js";
 
-const jsServerEntryPath = "src/server.entry.js";
-const tsServerEntryPath = "src/server.entry.ts";
+
+
+const jsServerEntryPath = "app/entry.server.js";
+const tsServerEntryPath = "app/entry.server.ts";
 
 const defaultConfig: UserConfigExport = {
 	cacheDir: "cache",
@@ -71,7 +73,7 @@ const defaultConfig: UserConfigExport = {
 	restack: {
 		external : [],
 		apiPrefix: "/api",
-		routesDir: "src/routes",
+		routesDir: "app/routes",
 		outFile: "index.js",
 		port: 8080,
 	},
