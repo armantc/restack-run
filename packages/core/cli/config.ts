@@ -23,7 +23,7 @@ const defaultConfig: UserConfigExport = {
 			// legacy({
 			// 	targets: ["defaults", "not IE 11"],
 			// }),
-			react(),
+			// react(),
 			svgrPlugin({
 				svgrOptions: {
 					icon: true,
@@ -115,14 +115,14 @@ export default async function config(configFile): Promise<UserConfig> {
 		mergedConfig.restack.routesDir =
 			mergedConfig.restack.routesDir.substring(1);
 
-	mergedConfig.vite.server = {
+	mergedConfig.vite.server ={ ...mergedConfig.vite.server ,...{
 		proxy: {
 			[mergedConfig.restack.apiPrefix]: {
 				target: `http://localhost:${mergedConfig.restack.port}`,
 				changeOrigin: true,
 			},
 		},
-	};
+	}};
 
 	if (!mergedConfig.restack.serverEntryPath) {
 		mergedConfig.restack.serverEntryPath =
