@@ -269,5 +269,4 @@ export interface Server {
 	delete: Route;
 	options: Route;
 	FastifyInstance : FastifyInstance
-	Routes : RouteOptions[]
 }

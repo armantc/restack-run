@@ -130,10 +130,6 @@ class _Server {
 	get FastifyInstance(){
 			return this.fastify;
 	}
-
-	get Routes(){
-		return this.routes;
-	}
 }
 
 const server = new _Server();
