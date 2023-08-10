@@ -12,16 +12,24 @@ import lodash from "lodash";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import logSymbols from "log-symbols";
 import type { UserConfig } from "./types";
+import { FileSystemCache } from "file-system-cache";
+import md5File from "md5-file";
+
+const fCache = new FileSystemCache({
+	basePath : "./cache"
+});
 
 const validRouteExts = ["js", "ts", "jsx", "tsx"];
 
 let nodeProcess: ChildProcessWithoutNullStreams;
 
+let cacheDir : string;
+
 export default async function restack(config: UserConfig) {
 
 	let outDir = config.outDir;
 
-	const cacheDir = path.join(config.cacheDir, ".restack");
+	cacheDir = path.join(config.cacheDir, ".restack");
 
 	if(!config.build && !config.preview) //dev mode
 	{
@@ -69,7 +77,6 @@ export default async function restack(config: UserConfig) {
 					if (error) console.log(error);
 					else {
 						debounceRunServer();
-						console.log(result);
 					}
 				},
 			},
@@ -93,7 +100,7 @@ export default async function restack(config: UserConfig) {
 
 		if (config.build) return;
 
-		runServer(config, bundlePath);
+		runServer(config, bundlePath,true);
 
 		const watchPaths: string[] = [];
 
@@ -138,7 +145,28 @@ function logResult(result: esbuild.BuildResult) {
 	}
 }
 
-function runServer(config: UserConfig, bundlePath: string) {
+function runServer(config: UserConfig, bundlePath: string,firstRun = false) {
+
+	let checksums = fCache.getSync("checksums");
+	checksums = checksums || {};
+
+	const entryFilePath = generateEntryOutPath(cacheDir);
+
+	const entryChecksum = md5File.sync(entryFilePath);
+	const bundleChecksum = md5File.sync(bundlePath);
+
+	if(checksums && !firstRun){
+		if(checksums.entry === entryChecksum && checksums.bundle === bundleChecksum){
+			//no change detected on backend
+			return;
+		}
+	}
+
+	fCache.setSync("checksums", {
+		entry: entryChecksum,
+		bundle: bundleChecksum,
+	});
+
 	if (nodeProcess) {
 		try {
 			nodeProcess.kill();
