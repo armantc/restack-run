@@ -159,14 +159,18 @@ class Fetcher<T extends RouteGenericInterface> {
 	then: Promise<T["Reply"]>["then"];
 }
 class Client<T extends RouteGenericInterface> {
-	private routeOptions: RouteOptions;
+	private _routeOptions: RouteOptions;
 
 	constructor(routeOptions: RouteOptions) {
-		this.routeOptions = routeOptions;
+		this._routeOptions = routeOptions;
 	}
 
 	fetch(options?: FetchOptions<T>) {
-		return new Fetcher<T>(this.routeOptions, options);
+		return new Fetcher<T>(this._routeOptions, options);
+	}
+
+	get routeOptions() {
+		return this._routeOptions;
 	}
 }
 
