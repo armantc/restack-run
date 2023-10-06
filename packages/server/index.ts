@@ -45,6 +45,9 @@ class _Server {
 
 		addFormats(ajv);
 
+		ajv.addKeyword("meta");
+		ajv.addKeyword("metadata");
+
 		this.fastify.setValidatorCompiler(({ schema }) => {
 			return ajv.compile(schema);
 		});
