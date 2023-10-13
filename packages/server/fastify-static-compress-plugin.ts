@@ -52,7 +52,7 @@ export default function (fastify, options, done) {
 			let url = request.raw.url;
 			if (url.charAt(0) !== "/") url = "/" + url;
 
-			if (url.toLowerCase().startsWith(path.toLowerCase())) done();
+			if (url.toLowerCase().startsWith(path.toLowerCase())) return done();
 		}
 
 		changeUrlFromEmptyToIndexHtml(request);
